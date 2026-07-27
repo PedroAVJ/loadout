@@ -1,14 +1,14 @@
 ---
 name: analysis
-description: "Use when Pedro wants Symphony to analyze requirements: apply the SWEBOK definition of a requirement and deliver one requirements table (classified along the kept SWEBOK dimensions, with allocation-minted derived rows and a blocked-by column) plus a conflicts list typed by SWEBOK's three conflict types. Persist the final analysis as a source-scoped repo ledger when a target product repo is available. Allocation runs under the hood, never as output."
+description: "Use when Pedro wants Symphony to analyze requirements: apply the SWEBOK definition of a requirement and deliver one requirements table (classified along the kept SWEBOK dimensions, with allocation-minted derived rows and a blocked-by column), a conflicts list typed by SWEBOK's three conflict types, and a logical data-model diff when the requirements reshape data. Persist the final analysis as a source-scoped repo ledger when a target product repo is available. Allocation runs under the hood, never as output."
 ---
 
 # Symphony Requirements Analysis
 
-This skill covers the SWEBOK definition of a requirement plus three
-analysis topics: Requirements Classification, Requirements Allocation, and
-Requirements Negotiation. Conceptual modeling and formal analysis are
-deliberately dropped — Pedro's call, do not reintroduce either.
+This skill covers the SWEBOK definition of a requirement plus four
+analysis topics: Requirements Classification, Conceptual Modeling,
+Requirements Allocation, and Requirements Negotiation. Formal analysis is
+deliberately dropped — Pedro's call, do not reintroduce it.
 
 ## Reference Vocabulary
 
@@ -75,6 +75,26 @@ Classify each requirement along:
    (satisfiable by one component) vs global (cannot be allocated to a
    discrete component; constrains architecture and every future change).
 
+## Conceptual Modeling
+
+SWEBOK's conceptual modeling topic, scoped to how Pedro actually reads
+systems: the data model, at the logical level. Model when the analyzed
+requirements reshape data — new entities, moved attributes, changed
+relationships. Skip it when they do not; a model with no structural change
+is decoration.
+
+- Model the LOGICAL view: entity names, attributes, relationships and
+  their cardinalities. No SQL types, no FK id columns, no index noise —
+  that is the physical layer, below this skill.
+- Present change as a diff on the logical view: "what is" (grounded in the
+  actual current entities — read them, never reconstruct from memory)
+  against "what will be" (from the requirement rows). Reuse the
+  schema-diff visual grammar — ER cards plus a git-style diff block,
+  diff-colored added/changed/removed — with open decisions marked amber
+  carrying the owning row id, never silently resolved.
+- Deliver it as a rendered artifact opened for Pedro alongside the
+  requirements table; the table stays the primary deliverable.
+
 ## Flow
 
 Analysis runs as a pipeline with one feedback loop:
@@ -88,6 +108,9 @@ Analysis runs as a pipeline with one feedback loop:
 4. Run the conflict check last, over the complete row set. It must be
    last: derived requirements can be the conflicting ones, and they do not
    exist until allocation mints them.
+5. When the final rows reshape data, render the conceptual model from
+   that final row set — after conflicts, so the diff reflects every row
+   that survived.
 
 ## Allocation
 
@@ -138,6 +161,8 @@ The deliverable is one requirements table plus a conflicts list:
   specification time.
 - Conflicts: a short list after the table, each entry naming the two rows
   involved and which of the three conflict types it is.
+- Conceptual model: when the rows reshape data, a logical data-model diff
+  (see Conceptual Modeling) delivered as a rendered artifact.
 
 Present the complete table and conflicts list in chat. Do not replace the
 deliverable with a summary, selected rows, or a link to the persisted file.
