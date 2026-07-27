@@ -164,7 +164,11 @@ The file begins with:
   IDs, and do not authorize implementation.
 
 Then write the same complete requirements table and conflicts list presented in
-chat. Keep row identifiers stable within an existing ledger. When later evidence
+chat. Number the final reconciled table contiguously from R1 before first
+persisting it — rows dropped during drafting (including the Codex pass) leave
+no gaps. Identifier stability begins at first persist: from then on keep row
+identifiers stable, and a row removed by later re-analysis leaves its gap so
+surviving references hold. When later evidence
 changes the analysis, update the row with its source attribution intact; never
 silently harden a hedge into an approved specification.
 
