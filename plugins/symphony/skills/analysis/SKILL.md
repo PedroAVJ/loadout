@@ -48,6 +48,20 @@ A demonstrated behavior still earns a row when something remains demanded:
 the source imposes a change to it, leaves an open question or a pending
 stakeholder validation, or puts it in conflict.
 
+Two more shapes that are never rows:
+
+- **Action items and validation gates.** "Check with X before building" is
+  the pending-validation state of the row it gates — record it in that
+  row's derivation (which fixes where validation happens) or blocked-by,
+  never as a row of its own. Requirements tables are not to-do lists.
+- **Stakeholder-uttered design.** Stakeholders speak at every altitude,
+  and attribution does not promote a design sketch into a requirement.
+  When a stakeholder proposes mechanisms, extract the property the
+  mechanisms are trying to achieve — that is the row — and keep the
+  sketches as derivation notes. The tell: a row containing a menu of
+  alternatives is a decision pending specification, not a requirement;
+  requirements do not have options.
+
 ## Classification
 
 SWEBOK's Requirements Classification topic lists six dimensions. Symphony
