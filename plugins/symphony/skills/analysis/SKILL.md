@@ -31,6 +31,23 @@ in order to solve some problem in the real world." It must be:
 - **Quantified where appropriate** — "under 2s for 95% of transactions",
   not "fast".
 
+## Candidate Scope
+
+Rows are candidates for future work, not a delivery record. Ground
+implementation status in the product repo (code, merged history) before
+writing a row. When the source demonstrates behavior the product already
+exhibits and the stakeholder confirms it — a demo walkthrough, a
+re-confirmation — that is validation evidence, not a candidate:
+
+- annotate the prior ledger row that captured the requirement (update in
+  place, source-attributed), or
+- leave nothing when no prior row exists — git history is the record of
+  shipped behavior.
+
+A demonstrated behavior still earns a row when something remains demanded:
+the source imposes a change to it, leaves an open question or a pending
+stakeholder validation, or puts it in conflict.
+
 ## Classification
 
 SWEBOK's Requirements Classification topic lists six dimensions. Symphony
@@ -112,8 +129,8 @@ prioritization is effort-rationing. Do not apply or record either.
 
 The deliverable is one requirements table plus a conflicts list:
 
-- Rows: every requirement — elicited and allocation-minted alike, on the
-  same table.
+- Rows: every candidate requirement in scope (see Candidate Scope) —
+  elicited and allocation-minted alike, on the same table.
 - Columns: the four classification dimensions (derivation carries the
   parent pointer) plus a blocked-by column — which rows must exist first.
   The blocked-by column is the artifact allocation leaves behind; it
@@ -182,7 +199,8 @@ The forwarded task must contain:
 - An explicit "review only, read-only, make no edits" instruction.
 - The critique brief: challenge each row on requirement vs design
   decision, verifiability (was a hedge quantified into a fake number?),
-  derivation traced to a named stakeholder, scope (global only when
+  derivation traced to a named stakeholder, candidate scope (is the row
+  merely re-validating already-shipped behavior?), scope (global only when
   genuinely unallocatable), product vs process, missed requirements still
   in the sources, and conflict typing. Findings only — no rewrite.
 
