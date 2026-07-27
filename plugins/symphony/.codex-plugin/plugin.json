@@ -1,6 +1,6 @@
 {
   "name": "symphony",
-  "version": "0.14.4",
+  "version": "0.14.5",
   "description": "Use Symphony workflow protocols from Codex for Pedro's explicit lifecycle loops.",
   "author": {
     "name": "PedroAVJ",

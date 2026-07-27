@@ -195,6 +195,11 @@ drift is dropped provenance and hedges hardened into false precision. So
 after drafting the full analysis and before presenting it, dispatch a
 critique to the `codex:codex-rescue` subagent as a single read-only task.
 
+Run the critique at maximum rigor: instruct the rescue subagent to pass
+`--effort xhigh`, and leave the model unset so the user's configured Codex
+default applies. The extra wall time is accepted; do not downgrade the
+effort to finish faster.
+
 The forwarded task must contain:
 
 - The complete draft analysis verbatim.
