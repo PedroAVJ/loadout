@@ -17,8 +17,8 @@ Available now:
   organization lookups through `gws`.
 - [`elevenlabs`](./elevenlabs): ElevenLabs Scribe transcription workflows with
   diarization, language hints, and keyterms.
-- [`claude`](./claude): Codex-stewarded Claude Code visual-explainer workflow
-  with streamed design handoffs.
+- [`claude`](./claude): Codex-stewarded Claude Fable frontend implementation
+  and visual-explainer workflows with streamed logs.
 - [`android-phone`](./android-phone): Android phone inspection, testing,
   debugging, and control through ADB.
 - [`whatsapp`](./whatsapp): local WhatsApp bridge, SQLite-backed reads,

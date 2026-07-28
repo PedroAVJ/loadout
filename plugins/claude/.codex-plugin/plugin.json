@@ -1,7 +1,7 @@
 {
   "name": "claude",
-  "version": "0.1.4",
-  "description": "Use Claude Code from Codex for stewarded visual explainer workflows.",
+  "version": "0.1.5",
+  "description": "Use Claude Code from Codex for stewarded frontend implementation and visual explainer workflows.",
   "author": {
     "name": "PedroAVJ",
     "url": "https://github.com/PedroAVJ"
@@ -18,18 +18,20 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Claude",
-    "shortDescription": "Create visual explainers with Claude",
-    "longDescription": "Use Claude Code for visual direction on polished single-file HTML explainers while keeping Codex as the steward of prompts, logs, implementation, and verification.",
+    "shortDescription": "Build frontend UI with Claude Fable",
+    "longDescription": "Use Claude Fable for the first implementation pass on browser-visible product UI and for visual direction on polished single-file HTML explainers. Codex remains responsible for scope, diff review, cleanup, verification, and shipping judgment.",
     "developerName": "PedroAVJ",
     "category": "Productivity",
     "capabilities": [
       "Interactive",
-      "Read"
+      "Read",
+      "Write"
     ],
     "websiteURL": "https://claude.ai/code",
     "privacyPolicyURL": "https://www.anthropic.com/legal/privacy",
     "termsOfServiceURL": "https://www.anthropic.com/legal/consumer-terms",
     "defaultPrompt": [
+      "Ask Claude Fable to implement a UI pass",
       "Make an HTML explainer"
     ],
     "brandColor": "#D97757",

@@ -24,7 +24,7 @@ The stack is intentionally practical:
 | [`plugins/google-tasks`](./plugins/google-tasks) | Open | Google Tasks reads and guarded mutations through `gws`. |
 | [`plugins/google-contacts`](./plugins/google-contacts) | Open | Google Contacts identity, phone, organization, and WhatsApp-enrichment lookups through `gws`. |
 | [`plugins/elevenlabs`](./plugins/elevenlabs) | Open | ElevenLabs Scribe transcription workflows with diarization, language hints, and keyterms. |
-| [`plugins/claude`](./plugins/claude) | Open | Codex-stewarded Claude Code visual-explainer workflow with streamed design handoffs. |
+| [`plugins/claude`](./plugins/claude) | Open | Codex-stewarded Claude Fable frontend implementation and visual-explainer workflows with streamed logs. |
 | [`plugins/android-phone`](./plugins/android-phone) | Open | Android phone inspection, testing, debugging, and control through ADB. |
 | [`plugins/symphony`](./plugins/symphony) | Open | Agent lifecycle workflows for evidence intake, issue coverage, Codex review, review artifacts, and explicit merge/release proof. |
 

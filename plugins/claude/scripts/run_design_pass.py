@@ -9,9 +9,13 @@ import time
 
 
 PLUGIN_ROOT = pathlib.Path(__file__).resolve().parents[1]
-DEFAULT_TEMPLATE = PLUGIN_ROOT / "templates" / "visual-handoff.md"
+DEFAULT_TEMPLATES = {
+    "visual": PLUGIN_ROOT / "templates" / "visual-handoff.md",
+    "handoff": PLUGIN_ROOT / "templates" / "frontend-handoff.md",
+    "implement": PLUGIN_ROOT / "templates" / "frontend-implementation.md",
+}
 DEFAULT_LOG_ROOT = pathlib.Path.home() / ".local" / "share" / "claude-plugin" / "design-logs"
-DEFAULT_MODEL = "claude-opus-4-8"
+DEFAULT_MODEL = "fable"
 
 
 def extract_text(value):
@@ -55,9 +59,47 @@ def print_event(event):
         print(f"\n[claude:{event_type}] {event.get('subtype') or event.get('message') or ''}", flush=True)
 
 
+def build_command(repo, debug_log, mode, model, effort, prompt):
+    permission_mode = "plan"
+    tools = "Read,Glob,Grep,LS"
+    if mode == "implement":
+        permission_mode = "acceptEdits"
+        tools = "Read,Glob,Grep,LS,Edit,Write"
+
+    cmd = [
+        "claude",
+        "-p",
+        "--output-format=stream-json",
+        "--include-partial-messages",
+        "--verbose",
+        "--no-chrome",
+        "--no-session-persistence",
+        "--debug-file",
+        str(debug_log),
+        "--add-dir",
+        str(repo),
+        "--permission-mode",
+        permission_mode,
+        "--tools",
+        tools,
+        "--effort",
+        effort,
+    ]
+    if model:
+        cmd.extend(["--model", model])
+    cmd.append(prompt)
+    return cmd
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Run a streamed Claude visual-design handoff.")
-    parser.add_argument("--repo", required=True, help="Repo path Claude may read.")
+    parser = argparse.ArgumentParser(description="Run a streamed Claude frontend or visual-design pass.")
+    parser.add_argument("--repo", required=True, help="Repo path Claude may read or edit.")
+    parser.add_argument(
+        "--mode",
+        choices=sorted(DEFAULT_TEMPLATES),
+        default="visual",
+        help="'implement' lets Claude edit UI; 'handoff' and 'visual' are read-only.",
+    )
     parser.add_argument("--prompt-file", default="", help="Base prompt/template file.")
     parser.add_argument("--prompt", default="", help="Extra prompt appended after the prompt file.")
     parser.add_argument("--log-root", default=str(DEFAULT_LOG_ROOT), help="Directory for raw stream and debug logs.")
@@ -66,7 +108,7 @@ def main():
     args = parser.parse_args()
 
     repo = pathlib.Path(args.repo).expanduser().resolve()
-    prompt_file = args.prompt_file or str(DEFAULT_TEMPLATE)
+    prompt_file = args.prompt_file or str(DEFAULT_TEMPLATES[args.mode])
     prompt_path = pathlib.Path(prompt_file).expanduser().resolve()
     log_root = pathlib.Path(args.log_root).expanduser().resolve()
     log_root.mkdir(parents=True, exist_ok=True)
@@ -79,30 +121,11 @@ def main():
     if args.prompt:
         prompt = f"{prompt}\n\nProject-specific request:\n{args.prompt}\n"
 
-    cmd = [
-        "claude",
-        "-p",
-        "--output-format=stream-json",
-        "--include-partial-messages",
-        "--verbose",
-        "--debug-file",
-        str(debug_log),
-        "--add-dir",
-        str(repo),
-        "--permission-mode",
-        "plan",
-        "--tools",
-        "Read,Glob,Grep,LS",
-        "--effort",
-        args.effort,
-    ]
-    if args.model:
-        cmd.extend(["--model", args.model])
-    cmd.append(prompt)
+    cmd = build_command(repo, debug_log, args.mode, args.model, args.effort, prompt)
 
     print(f"[claude-run] repo: {repo}")
     print(f"[claude-run] codex plugin: {PLUGIN_ROOT}")
-    print("[claude-run] mode: read-only visual handoff")
+    print(f"[claude-run] mode: {args.mode}")
     print(f"[claude-run] stream log: {raw_log}")
     print(f"[claude-run] debug log: {debug_log}")
     print()
