@@ -1,11 +1,11 @@
 ---
 name: publish-file
-description: Publish local files to durable URLs using the installed publish-file CLI, currently backed by Vercel Blob. Use when an agent needs to upload generated images, PDFs, screenshots, archives, or other local artifacts; embed uploaded assets in Notion or Markdown; inspect/list/download/delete published files; or verify publishing auth from any repo.
+description: Publish local files to durable URLs using the installed publish-file CLI, backed by Google Cloud Storage. Use when an agent needs to upload generated images, PDFs, screenshots, archives, or other local artifacts; embed uploaded assets in Notion or Markdown; inspect/list/download/delete published files; or verify publishing auth from any repo.
 ---
 
 # Publish File
 
-Use the installed `publish-file` CLI as the command surface for local file publishing. The current backing provider is Vercel Blob.
+Use the installed `publish-file` CLI as the command surface for local file publishing. The backing provider is Google Cloud Storage.
 
 ## Start
 
@@ -16,16 +16,17 @@ command -v publish-file
 publish-file --json doctor
 ```
 
-Auth is resolved in this order:
+Storage settings are resolved in this order:
 
-1. `BLOB_READ_WRITE_TOKEN` from the environment or `--env-file`
+1. `GCP_PROJECT_ID`, `GCS_PUBLIC_BUCKET`, and `GCS_PRIVATE_BUCKET` from the environment or `--env-file`
 2. `~/.publish-file/config.json`
-3. `--api-key` for explicit one-off tests
+3. The CLI's built-in Pedro App Storage defaults
 
-Store a token without putting it in shell history:
+Authentication uses Google Application Default Credentials. Initialize them and store the bucket configuration with:
 
 ```bash
-printf '%s' "$BLOB_READ_WRITE_TOKEN" | publish-file --json init --token-stdin
+gcloud auth application-default login
+publish-file --json init
 ```
 
 ## Upload Files
@@ -57,7 +58,7 @@ publish-file --json upload ./report.pdf \
 
 ## Inspect And Manage
 
-List recent blobs:
+List recent objects:
 
 ```bash
 publish-file --json list --prefix notion-assets --limit 20
@@ -78,14 +79,14 @@ publish-file --json download notion-assets/sheet.png --out /tmp/sheet.png
 Delete only when the user explicitly asks:
 
 ```bash
-publish-file --json delete https://...public.blob.vercel-storage.com/notion-assets/sheet.png --dry-run
+publish-file --json delete https://storage.googleapis.com/pedro-app-storage-20260801-public/notion-assets/sheet.png --dry-run
 ```
 
 ## Safety
 
 - Prefer `--json` so future steps can parse `url`, `downloadUrl`, `pathname`, and `etag`.
-- Do not print full tokens. `doctor` reports only whether auth exists and where it came from.
+- Do not print access tokens or service-account credentials. `doctor` reports only whether application-default auth is available.
 - Use public uploads for Notion/Markdown embeds that need to render without auth.
 - Use private uploads only when the consumer can authenticate or when the URL should not be embedded publicly.
 - Treat `delete`, `copy --allow-overwrite`, and `upload --allow-overwrite` as live writes; use `--dry-run` unless the user has already approved the write.
-- Use `publish-file --json native ...` only when the high-level commands do not expose a Vercel CLI feature.
+- Use `publish-file --json native ...` only when the high-level commands do not expose a Google Cloud Storage CLI feature.

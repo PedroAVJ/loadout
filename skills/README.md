@@ -17,7 +17,7 @@ repo.
 | `codex-app-hacking` | Inspect/patch/restore the local macOS Codex desktop app bundle (ASAR, codesigning) |
 | `linear` | Linear workspace conventions: no priorities, label by originating repo, plain-English issue references |
 | `mac-health-triage` | Diagnose macOS CPU heat, memory pressure, swap, and stale agent processes |
-| `publish-file` | Publish local files to durable URLs via the publish-file CLI (Vercel Blob) |
+| `publish-file` | Publish local files to durable URLs via the publish-file CLI (Google Cloud Storage) |
 | `sentry-logs` | Sentry Logs vs issues/events/traces; query the right surface |
 | `sqlite-cache-cli-pattern` | Durable CLIs that sync API/connector data into a local SQLite cache |
 
