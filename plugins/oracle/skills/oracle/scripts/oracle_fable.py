@@ -99,8 +99,8 @@ def main() -> int:
         "--print",
         "--system-prompt",
         (
-            "You are the Claude Fable 5 member of a two-model council. "
-            "Answer independently and separate verified facts from inference."
+            "You are Claude Fable 5. Give an independent expert answer and "
+            "separate verified facts from inference."
         ),
         "--tools",
         "",

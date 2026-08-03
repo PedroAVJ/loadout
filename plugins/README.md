@@ -5,8 +5,8 @@ Codex- and Claude Code-friendly shape.
 
 Available now:
 
-- [`oracle`](./oracle): Codex-hosted two-model council using GPT-5.6 Sol Pro in
-  the user's logged-in ChatGPT session and Claude Fable 5 through Claude Code.
+- [`oracle`](./oracle): Codex-hosted Claude Fable 5 second opinion through
+  Claude Code with fail-closed model verification.
 - [`gmail-cli`](./gmail-cli): raw Gmail message, MIME, and attachment workflows
   through the authenticated `gws` CLI.
 - [`google-drive-cli`](./google-drive-cli): Drive search, download, export,

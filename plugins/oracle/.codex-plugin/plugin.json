@@ -1,7 +1,7 @@
 {
   "name": "oracle",
-  "version": "0.2.0",
-  "description": "Consult GPT-5.6 Sol Pro in ChatGPT and Claude Fable 5 independently, then synthesize both answers.",
+  "version": "0.2.1",
+  "description": "Consult Claude Fable 5 through Claude Code with fail-closed model verification.",
   "author": {
     "name": "PedroAVJ",
     "url": "https://github.com/PedroAVJ"
@@ -11,37 +11,30 @@
   "license": "MIT",
   "keywords": [
     "oracle",
-    "chatgpt",
-    "gpt-5.6-sol-pro",
     "claude-fable-5",
-    "two-model-council",
     "second-opinion",
-    "chrome-plugin",
-    "claude-code"
+    "claude-code",
+    "model-verification"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Oracle",
-    "shortDescription": "Ask GPT-5.6 Pro and Fable 5",
-    "longDescription": "Send the same verified prompt independently to GPT-5.6 Sol Pro in the user's logged-in ChatGPT session and Claude Fable 5 through Claude Code, then preserve consensus and disagreements in a locally grounded synthesis.",
+    "shortDescription": "Ask Claude Fable 5",
+    "longDescription": "Send verified context to Claude Fable 5 through Claude Code, reject silent model fallback, and ground its second opinion against local evidence.",
     "developerName": "PedroAVJ",
     "category": "Productivity",
     "capabilities": [
       "Interactive",
-      "Browser",
       "Reasoning"
     ],
-    "websiteURL": "https://chatgpt.com/",
-    "privacyPolicyURL": "https://openai.com/policies/privacy-policy/",
-    "termsOfServiceURL": "https://openai.com/policies/terms-of-use/",
     "brandColor": "#0EA37F",
     "composerIcon": "./assets/oracle-icon.svg",
     "logo": "./assets/oracle-icon.svg",
     "screenshots": [],
     "defaultPrompt": [
-      "Ask Oracle for a GPT-5.6 Sol Pro and Fable 5 second opinion",
-      "Run this decision through both Oracle models",
-      "Use Oracle to compare two independent implementation reviews"
+      "Ask Oracle for Claude Fable 5's second opinion",
+      "Run this decision through Oracle",
+      "Use Oracle to challenge this implementation plan"
     ]
   }
 }

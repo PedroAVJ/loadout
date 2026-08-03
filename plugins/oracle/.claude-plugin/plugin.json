@@ -1,7 +1,7 @@
 {
   "name": "oracle",
-  "version": "0.2.0",
-  "description": "Codex-hosted council using GPT-5.6 Sol Pro in ChatGPT and Claude Fable 5 through Claude Code.",
+  "version": "0.2.1",
+  "description": "Codex-hosted Claude Fable 5 second opinion with fail-closed model verification.",
   "author": {
     "name": "PedroAVJ",
     "url": "https://github.com/PedroAVJ"
@@ -9,6 +9,6 @@
   "homepage": "https://github.com/PedroAVJ/swe-stack/tree/main/plugins/oracle",
   "repository": "https://github.com/PedroAVJ/swe-stack",
   "license": "MIT",
-  "keywords": ["oracle", "chatgpt", "gpt-5.6-sol-pro", "claude-fable-5", "second-opinion", "two-model-council"],
+  "keywords": ["oracle", "claude-fable-5", "claude-code", "second-opinion", "model-verification"],
   "skills": "./skills/"
 }

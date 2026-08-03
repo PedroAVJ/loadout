@@ -1,5 +1,5 @@
-import json
 import importlib.util
+import json
 import unittest
 from pathlib import Path
 
@@ -9,7 +9,7 @@ PLUGIN_ROOT = REPO_ROOT / "plugins" / "oracle"
 SKILL_PATH = PLUGIN_ROOT / "skills" / "oracle" / "SKILL.md"
 
 
-class DualOracleContractTests(unittest.TestCase):
+class FableOracleContractTests(unittest.TestCase):
     def setUp(self) -> None:
         self.skill = SKILL_PATH.read_text(encoding="utf-8")
         self.codex_manifest = json.loads(
@@ -30,20 +30,19 @@ class DualOracleContractTests(unittest.TestCase):
         self.oracle_fable = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(self.oracle_fable)
 
-    def test_manifest_versions_match_and_are_semver(self) -> None:
-        codex_version = self.codex_manifest["version"]
-        self.assertEqual(codex_version, self.claude_manifest["version"])
-        self.assertRegex(codex_version, r"^\d+\.\d+\.\d+$")
+    def test_release_version_is_0_2_1(self) -> None:
+        self.assertEqual(self.codex_manifest["version"], "0.2.1")
+        self.assertEqual(self.claude_manifest["version"], "0.2.1")
 
-    def test_both_requested_models_are_named(self) -> None:
+    def test_fable_is_the_only_oracle_model(self) -> None:
         for text in (
             self.skill,
             (PLUGIN_ROOT / "README.md").read_text(encoding="utf-8"),
             self.codex_manifest["description"],
             self.claude_manifest["description"],
         ):
-            self.assertIn("GPT-5.6 Sol Pro", text)
             self.assertIn("Fable 5", text)
+        self.assertIn("Fable 5 is the only Oracle model", self.skill)
 
     def test_fable_invocation_is_explicit_and_ephemeral(self) -> None:
         for required in (
@@ -124,49 +123,64 @@ class DualOracleContractTests(unittest.TestCase):
         with self.assertRaises(self.oracle_fable.FableValidationError):
             self.oracle_fable.validate_fable_result(fable_and_opus)
 
-    def test_both_independent_answers_are_required(self) -> None:
-        normalized_skill = " ".join(self.skill.split())
-        self.assertIn("Both answers are required", self.skill)
-        self.assertIn(
-            "Do not include one model's answer in the other model's prompt",
-            normalized_skill,
-        )
-        self.assertIn("do not silently", self.skill.lower())
-        self.assertIn("partial council result", self.skill)
-        self.assertIn("Disagreements", self.skill)
-
-    def test_visible_pro_verification_is_required(self) -> None:
-        self.assertIn("choose **Pro**", self.skill)
-        self.assertIn("explicit `GPT-5.6 Sol Pro` label", self.skill)
-        self.assertIn("A control reading `Instant`", self.skill)
+    def test_failure_returns_no_oracle_answer(self) -> None:
+        self.assertIn("Oracle did not produce an answer", self.skill)
+        self.assertIn("do not return an Oracle answer", self._agent_yaml())
+        self.assertIn("Do not silently", self.skill)
 
     def test_neutral_icons_exist_and_are_referenced(self) -> None:
         icon = PLUGIN_ROOT / "assets" / "oracle-icon.svg"
         skill_icon = PLUGIN_ROOT / "skills" / "oracle" / "assets" / "oracle-icon.svg"
         self.assertTrue(icon.is_file())
         self.assertTrue(skill_icon.is_file())
-        self.assertEqual(self.codex_manifest["interface"]["logo"], "./assets/oracle-icon.svg")
-        agent_yaml = (
-            PLUGIN_ROOT / "skills" / "oracle" / "agents" / "openai.yaml"
-        ).read_text(encoding="utf-8")
-        self.assertIn('./assets/oracle-icon.svg', agent_yaml)
+        self.assertEqual(
+            self.codex_manifest["interface"]["logo"], "./assets/oracle-icon.svg"
+        )
+        self.assertIn('./assets/oracle-icon.svg', self._agent_yaml())
 
-    def test_stale_gpt_5_5_references_are_gone(self) -> None:
-        stale_marker = "gpt-" + "5.5"
-        checked_paths = [
+    def test_removed_lane_claims_are_absent_from_visible_content(self) -> None:
+        removed_terms = (
+            "g" + "pt",
+            "chat" + "gpt",
+            "chro" + "me",
+            "two-" + "model",
+            "coun" + "cil",
+        )
+        visible_files = [
             REPO_ROOT / "README.md",
             REPO_ROOT / "plugins" / "README.md",
             REPO_ROOT / ".claude-plugin" / "marketplace.json",
-            *[path for path in PLUGIN_ROOT.rglob("*") if path.is_file()],
+            *[
+                path
+                for path in PLUGIN_ROOT.rglob("*")
+                if path.is_file()
+                and "__pycache__" not in path.parts
+                and "tests" not in path.parts
+                and path.suffix.lower() in {".md", ".json", ".yaml", ".py", ".svg"}
+            ],
         ]
-        for path in checked_paths:
-            self.assertNotIn(stale_marker, str(path).lower())
-            if path.suffix.lower() in {".md", ".json", ".yaml", ".py", ".svg"}:
-                self.assertNotIn(
-                    stale_marker,
-                    path.read_text(encoding="utf-8").lower(),
-                    msg=str(path),
+        for path in visible_files:
+            text = path.read_text(encoding="utf-8").lower()
+            if path in {REPO_ROOT / "README.md", REPO_ROOT / "plugins" / "README.md"}:
+                text = "\n".join(
+                    line for line in text.splitlines() if "plugins/oracle" in line or "oracle" in line
                 )
+            if path == REPO_ROOT / ".claude-plugin" / "marketplace.json":
+                marketplace = json.loads(path.read_text(encoding="utf-8"))
+                text = json.dumps(
+                    next(
+                        plugin
+                        for plugin in marketplace["plugins"]
+                        if plugin["name"] == "oracle"
+                    )
+                ).lower()
+            for term in removed_terms:
+                self.assertNotIn(term, text, msg=f"{term} in {path}")
+
+    def _agent_yaml(self) -> str:
+        return (
+            PLUGIN_ROOT / "skills" / "oracle" / "agents" / "openai.yaml"
+        ).read_text(encoding="utf-8")
 
 
 if __name__ == "__main__":

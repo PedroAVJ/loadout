@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Build a single static Oracle dossier zip for ChatGPT web/pro-model handoffs.
+Build a single static Oracle dossier zip for external model handoffs.
 
 The zip is meant to be uploaded to a model that cannot call tools. It contains:
 - an optional task prompt,

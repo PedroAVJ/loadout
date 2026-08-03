@@ -4,7 +4,7 @@ Create a small "oracle context" zip for handing a question off to another model/
 
 Design goals:
 - Prefer git archive for deterministic tracked file selection.
-- Default to packaging the entire tracked repository for ChatGPT handoffs.
+- Default to packaging the entire tracked repository for external handoffs.
 - Optionally include untracked files under selected paths.
 - Always include an ORACLE_MANIFEST.txt inside the zip so the bundle is inspectable.
 - Do not generate standalone prompt files by default; you can paste your original chat message
@@ -48,7 +48,7 @@ def sanitize_name(value: str) -> str:
 
 
 def default_name(repo: Path, paths: list[str]) -> str:
-    # ChatGPT default: stable, project-based filename for whole-repo bundles.
+    # Stable, project-based filename for whole-repo bundles.
     if not paths or paths == ["."]:
         return f"{sanitize_name(repo.name)}-repo"
     base = Path(paths[0]).name or "context"

@@ -17,7 +17,7 @@ The stack is intentionally practical:
 
 | Module | Status | Description |
 | --- | --- | --- |
-| [`plugins/oracle`](./plugins/oracle) | Open | Codex-hosted two-model council using GPT-5.6 Sol Pro in the user's logged-in ChatGPT session and Claude Fable 5 through Claude Code. |
+| [`plugins/oracle`](./plugins/oracle) | Open | Codex-hosted Claude Fable 5 second opinion through Claude Code with fail-closed model verification. |
 | [`plugins/whatsapp`](./plugins/whatsapp) | Open | WhatsApp bridge, SQLite-backed reads, media/context tools, reviewable drafts, and guarded sends for Codex and Claude Code. |
 | [`plugins/gmail-cli`](./plugins/gmail-cli) | Open | Gmail raw-message, MIME, and attachment workflows through the authenticated `gws` CLI. |
 | [`plugins/google-drive-cli`](./plugins/google-drive-cli) | Open | Google Drive search, download, export, upload, and permission workflows through `gws`. |

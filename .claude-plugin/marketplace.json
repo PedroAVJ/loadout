@@ -15,7 +15,7 @@
     },
     {
       "name": "oracle",
-      "description": "Run a two-model council with GPT-5.6 Sol Pro in ChatGPT and Claude Fable 5 through Claude Code.",
+      "description": "Ask Claude Fable 5 through Claude Code for a fail-closed, identity-verified second opinion.",
       "category": "productivity",
       "source": "./plugins/oracle",
       "homepage": "https://github.com/PedroAVJ/swe-stack/tree/main/plugins/oracle"

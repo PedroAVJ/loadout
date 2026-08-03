@@ -1,35 +1,25 @@
 # SWE Stack Oracle Plugin
 
-A Codex-hosted, two-model council that independently consults ChatGPT's
-GPT-5.6 Sol Pro and Claude Fable 5, then synthesizes their answers without
-hiding disagreements.
+A Codex-hosted Claude Fable 5 second-opinion workflow with fail-closed model
+identity verification.
 
-Oracle is intentionally not an API wrapper. It uses the user's existing
-authenticated products:
+Oracle is intentionally not an API wrapper. It uses the user's authenticated
+Claude Code installation with the canonical `--model claude-fable-5` selector,
+model substitution disabled, restricted tools, JSON output, and no session
+persistence. Its helper inspects Claude Code's `modelUsage` metadata and rejects
+Opus, Sonnet, or unknown-model output instead of silently accepting a fallback.
 
-- ChatGPT Pro in Chrome, controlled through the Codex Chrome Extension. The
-  workflow selects and visibly verifies `Pro`, which currently maps to
-  GPT-5.6 Sol Pro.
-- Claude Code with the canonical `--model claude-fable-5` selector, model
-  substitution disabled, restricted tools, JSON output, and no session
-  persistence.
-- A fail-closed helper that prevents model fallback and rejects Opus, Sonnet,
-  or unknown-model output by inspecting Claude Code's `modelUsage` metadata.
-
-This project is unofficial and is not affiliated with OpenAI or Anthropic.
-ChatGPT, GPT, OpenAI, Claude, and related marks belong to their respective
-owners.
+This project is unofficial and is not affiliated with Anthropic. Claude and
+related marks belong to their respective owners.
 
 ## What You Get
 
-- One canonical `oracle` skill.
-- The same verified prompt sent independently to both models.
-- No silent fallback when either requested model is unavailable.
-- Model-identity checks before an answer counts.
-- A synthesis contract that surfaces consensus, disagreements, each model's
-  strongest unique insight, and the local tests still needed.
-- Patient ChatGPT recovery: reclaim a stalled Chrome tab or reopen its saved
-  `chatgpt.com/c/...` conversation before starting a duplicate run.
+- One canonical `oracle` skill powered only by Claude Fable 5.
+- Verified local context condensed into a focused second-opinion prompt.
+- No silent fallback when Fable 5 is unavailable.
+- A model-identity check before an answer counts.
+- A response contract that separates Fable's recommendation from Codex's local
+  evidence check and the tests still needed.
 - Legacy static dossier scripts only for explicit bundle requests.
 
 ## Install With Codex
@@ -61,33 +51,24 @@ Examples:
 
 ```text
 Ask Oracle to sanity-check this architecture decision.
-Use Oracle for a second opinion on this device-only bug.
-Run this implementation plan by GPT-5.6 Sol Pro and Fable 5.
+Use Oracle for Fable 5's second opinion on this device-only bug.
+Run this implementation plan by Oracle.
 ```
 
-Oracle first gathers verified local context. It then starts a fresh ChatGPT
-conversation, selects `Pro`, sends the prompt, and runs the same prompt through
-Claude Code with Fable 5. Codex waits for both answers and synthesizes them.
+Oracle first gathers verified local context. It sends one focused prompt to the
+authenticated Claude Code CLI through the fail-closed Fable helper, verifies
+that Fable 5 produced the substantive output, and checks the recommendation
+against the local evidence.
 
-The complete dual workflow is Codex-hosted. The Claude-compatible manifest
-makes the skill discoverable, but an Oracle invocation from inside Claude Code
-must not pretend a recursive Claude process plus a missing Codex Chrome lane is
-an independent two-model council.
+## Failure Behavior
 
-## Recovery
-
-If Chrome can still list or claim the ChatGPT tab but DOM or screenshot reads
-time out, recover the saved `https://chatgpt.com/c/...` URL from the tab list or
-focused history lookup, open it in a fresh tab, and extract the completed answer
-there. Only start a duplicate Pro run after this recovery path fails.
-
-If either requested model is unavailable, Oracle reports the exact failed
-surface and labels the surviving answer as partial. Sonnet, Opus, Haiku,
-Instant, Medium, High, and Extra High are not silent substitutes.
+If Claude Code cannot provide verified Fable 5 output, Oracle reports the exact
+failure and returns no Oracle answer. Sonnet, Opus, Haiku, or unknown models are
+not silent substitutes.
 
 ## Privacy And Source Checks
 
-Oracle sends its prompt to both OpenAI and Anthropic. An explicit Oracle request
-authorizes relevant nonsensitive context, but credentials, private identifiers,
-medical or financial details, private messages, browsing history, and personal
-files require specific approval before transmission to both providers.
+Oracle sends its prompt to Anthropic. An explicit Oracle request authorizes
+relevant nonsensitive context, but credentials, private identifiers, medical or
+financial details, private messages, browsing history, and personal files
+require specific approval before transmission.
