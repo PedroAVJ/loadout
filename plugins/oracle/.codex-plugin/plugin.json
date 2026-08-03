@@ -1,7 +1,7 @@
 {
   "name": "oracle",
-  "version": "0.1.2",
-  "description": "Ask ChatGPT Pro (GPT-5.5 Pro) from Codex through the user's logged-in Chrome session.",
+  "version": "0.2.0",
+  "description": "Consult GPT-5.6 Sol Pro in ChatGPT and Claude Fable 5 independently, then synthesize both answers.",
   "author": {
     "name": "PedroAVJ",
     "url": "https://github.com/PedroAVJ"
@@ -12,15 +12,18 @@
   "keywords": [
     "oracle",
     "chatgpt",
-    "gpt-5.5-pro",
+    "gpt-5.6-sol-pro",
+    "claude-fable-5",
+    "two-model-council",
     "second-opinion",
-    "chrome-plugin"
+    "chrome-plugin",
+    "claude-code"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Oracle",
-    "shortDescription": "Ask GPT-5.5 Pro through Chrome",
-    "longDescription": "Use the Chrome plugin / Codex Chrome Extension against the user's logged-in Chrome ChatGPT session, select and verify Pro (GPT-5.5 Pro / Extended Pro), ask one focused second-opinion prompt, wait without canceling for duration alone, and summarize the useful answer back into Codex.",
+    "shortDescription": "Ask GPT-5.6 Pro and Fable 5",
+    "longDescription": "Send the same verified prompt independently to GPT-5.6 Sol Pro in the user's logged-in ChatGPT session and Claude Fable 5 through Claude Code, then preserve consensus and disagreements in a locally grounded synthesis.",
     "developerName": "PedroAVJ",
     "category": "Productivity",
     "capabilities": [
@@ -31,14 +34,14 @@
     "websiteURL": "https://chatgpt.com/",
     "privacyPolicyURL": "https://openai.com/policies/privacy-policy/",
     "termsOfServiceURL": "https://openai.com/policies/terms-of-use/",
-    "brandColor": "#FF7A6C",
-    "composerIcon": "./assets/gpt-5.5-pro.png",
-    "logo": "./assets/gpt-5.5-pro.png",
+    "brandColor": "#0EA37F",
+    "composerIcon": "./assets/oracle-icon.svg",
+    "logo": "./assets/oracle-icon.svg",
     "screenshots": [],
     "defaultPrompt": [
-      "Ask Oracle for a GPT-5.5 Pro second opinion",
-      "Run this decision by GPT-5.5 Pro",
-      "Use Oracle to sanity-check this implementation"
+      "Ask Oracle for a GPT-5.6 Sol Pro and Fable 5 second opinion",
+      "Run this decision through both Oracle models",
+      "Use Oracle to compare two independent implementation reviews"
     ]
   }
 }

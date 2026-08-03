@@ -1,7 +1,7 @@
 interface:
   display_name: "Oracle"
-  short_description: "Ask GPT-5.5 Pro through Chrome using the Chrome plugin"
-  icon_small: "./assets/gpt-5.5-pro.png"
-  icon_large: "./assets/gpt-5.5-pro.png"
-  brand_color: "#FF7A6C"
-  default_prompt: "When asked to use Oracle, gather the relevant verified local context, then use the Chrome plugin / Codex Chrome Extension against the user's logged-in Chrome ChatGPT session. Select Pro (GPT-5.5 Pro / Extended Pro), verify the visible model control says Extended Pro or an equivalent Pro label before sending, wait for the answer to complete even if it takes many minutes, and summarize the useful guidance back in Codex. Do not use the in-app Browser. Do not use Computer Use by default. Never cancel a Pro run for duration alone; recover/reclaim the tab if the Chrome plugin socket stalls. If the live ChatGPT tab is claimable but body, DOM, or screenshot reads keep timing out, recover the saved chatgpt.com/c conversation URL from open tabs or Chrome history, reopen it in a fresh tab, and extract the completed answer there before starting a duplicate run."
+  short_description: "Ask GPT-5.6 Pro and Fable 5 independently"
+  icon_small: "./assets/oracle-icon.svg"
+  icon_large: "./assets/oracle-icon.svg"
+  brand_color: "#0EA37F"
+  default_prompt: "When asked to use Oracle, first gather verified local context and create one focused prompt. Send that same prompt independently to both required lanes: (1) the user's logged-in ChatGPT Pro session through the Chrome plugin, with the visible Intelligence control set to Pro and re-verified before sending, which currently selects GPT-5.6 Sol Pro; and (2) the authenticated Claude Code CLI with --model claude-fable-5, CLAUDE_CODE_NO_MODEL_FALLBACK=1, no effort override, restricted tools, JSON output, and no session persistence, verifying that modelUsage contains claude-fable-5 and no disallowed model output. Do not use the fable alias for substantive prompts. Wait for both answers. Do not expose either answer to the other model, do not silently substitute another model, and label a one-lane result partial. Synthesize consensus, disagreements, each model's strongest unique insight, Codex's locally grounded verdict, and the smallest remaining verification steps."

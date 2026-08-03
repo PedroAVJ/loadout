@@ -1,39 +1,48 @@
 # SWE Stack Oracle Plugin
 
-A Codex-first plugin for getting a second opinion from the user's logged-in ChatGPT Pro session, currently GPT-5.5 Pro.
+A Codex-hosted, two-model council that independently consults ChatGPT's
+GPT-5.6 Sol Pro and Claude Fable 5, then synthesizes their answers without
+hiding disagreements.
 
-Oracle is intentionally not an API wrapper. It packages the existing Oracle skill as a plugin and preserves the live workflow: gather verified local context, use the Chrome plugin / Codex Chrome Extension against the user's logged-in Chrome session, select Pro (GPT-5.5 Pro / Extended Pro) in ChatGPT, send one focused prompt, wait for the answer, and bring the useful guidance back into Codex.
+Oracle is intentionally not an API wrapper. It uses the user's existing
+authenticated products:
 
-This project is unofficial and is not affiliated with OpenAI. ChatGPT, GPT, OpenAI, and related marks are trademarks of OpenAI.
+- ChatGPT Pro in Chrome, controlled through the Codex Chrome Extension. The
+  workflow selects and visibly verifies `Pro`, which currently maps to
+  GPT-5.6 Sol Pro.
+- Claude Code with the canonical `--model claude-fable-5` selector, model
+  substitution disabled, restricted tools, JSON output, and no session
+  persistence.
+- A fail-closed helper that prevents model fallback and rejects Opus, Sonnet,
+  or unknown-model output by inspecting Claude Code's `modelUsage` metadata.
 
-The plugin icon uses the GPT-5.5 Pro model-card image published on the OpenAI Developers model page.
+This project is unofficial and is not affiliated with OpenAI or Anthropic.
+ChatGPT, GPT, OpenAI, Claude, and related marks belong to their respective
+owners.
 
 ## What You Get
 
 - One canonical `oracle` skill.
-- Chrome plugin + the user's logged-in Chrome session as the default path.
-- GPT-5.5 Pro named explicitly as the target ChatGPT Pro model.
-- A hard verification step that the visible model control says `Extended Pro`
-  or an equivalent Pro label before sending.
-- A waiting rule: never cancel Pro for duration alone; recover and re-claim the
-  tab if the Chrome plugin socket stalls.
-- A saved-history recovery rule: if the live ChatGPT tab can be listed or
-  claimed but page reads time out, reopen the saved `chatgpt.com/c/...`
-  conversation in a fresh tab and extract the completed answer there.
-- A prompt shape for second-opinion engineering and product decisions.
-- Guardrails against using logged-out, free, in-app-browser, or non-Pro surfaces.
-- Legacy static dossier scripts preserved only for explicit bundle requests.
+- The same verified prompt sent independently to both models.
+- No silent fallback when either requested model is unavailable.
+- Model-identity checks before an answer counts.
+- A synthesis contract that surfaces consensus, disagreements, each model's
+  strongest unique insight, and the local tests still needed.
+- Patient ChatGPT recovery: reclaim a stalled Chrome tab or reopen its saved
+  `chatgpt.com/c/...` conversation before starting a duplicate run.
+- Legacy static dossier scripts only for explicit bundle requests.
 
-## Use With Codex
+## Install With Codex
 
-Install SWE Stack as a Codex marketplace, then install the `oracle` plugin from the Plugins screen.
+Install SWE Stack as a Codex marketplace, then install `oracle` from the
+Plugins screen.
 
 ```bash
 codex plugin marketplace add PedroAVJ/swe-stack --ref main --sparse .agents/plugins --sparse plugins/oracle
 codex plugin marketplace upgrade
 ```
 
-In the Codex app, the equivalent Add marketplace values are:
+Equivalent marketplace values in the Codex app:
 
 ```text
 Source: PedroAVJ/swe-stack
@@ -43,35 +52,42 @@ Sparse paths:
 plugins/oracle
 ```
 
-If you already installed SWE Stack for another plugin, add `plugins/oracle` to the sparse paths or leave sparse paths blank, then run `codex plugin marketplace upgrade`.
+If SWE Stack is already installed, add `plugins/oracle` to its sparse paths or
+leave sparse paths blank, then run `codex plugin marketplace upgrade`.
 
 ## Oracle Flow
 
-Use Oracle when you want a high-quality second opinion:
+Examples:
 
 ```text
 Ask Oracle to sanity-check this architecture decision.
-Use Oracle for a second opinion on this bug.
-Run this implementation plan by GPT-5.5 Pro.
+Use Oracle for a second opinion on this device-only bug.
+Run this implementation plan by GPT-5.6 Sol Pro and Fable 5.
 ```
 
-The skill requires the user's logged-in ChatGPT session in Chrome and will not automate login challenges, CAPTCHAs, credential prompts, or account setup.
+Oracle first gathers verified local context. It then starts a fresh ChatGPT
+conversation, selects `Pro`, sends the prompt, and runs the same prompt through
+Claude Code with Fable 5. Codex waits for both answers and synthesizes them.
 
-## Recovery Path
+The complete dual workflow is Codex-hosted. The Claude-compatible manifest
+makes the skill discoverable, but an Oracle invocation from inside Claude Code
+must not pretend a recursive Claude process plus a missing Codex Chrome lane is
+an independent two-model council.
 
-If the Chrome plugin can still list or claim the ChatGPT tab but body, DOM, or
-screenshot reads time out, do not assume the Pro answer is lost. Use Chrome open
-tabs or history to find the saved `https://chatgpt.com/c/...` conversation URL,
-open that URL in a fresh tab, wait for the conversation to load, and extract the
-completed answer from the fresh tab. Only start a duplicate Oracle run after
-this saved-history recovery path has failed.
+## Recovery
+
+If Chrome can still list or claim the ChatGPT tab but DOM or screenshot reads
+time out, recover the saved `https://chatgpt.com/c/...` URL from the tab list or
+focused history lookup, open it in a fresh tab, and extract the completed answer
+there. Only start a duplicate Pro run after this recovery path fails.
+
+If either requested model is unavailable, Oracle reports the exact failed
+surface and labels the surviving answer as partial. Sonnet, Opus, Haiku,
+Instant, Medium, High, and Extra High are not silent substitutes.
 
 ## Privacy And Source Checks
 
-Oracle is a reasoning surface, not a replacement for local source-of-truth checks. The skill instructs agents to inspect local files, diffs, logs, docs, tickets, messages, or deployment state first, then send only the verified context needed for the second opinion.
-
-If the prompt would transmit sensitive private data to ChatGPT and that transmission has not been approved, the agent should ask before sending.
-
-## Claude Code
-
-This plugin includes a Claude-compatible manifest, but the primary browser automation workflow is Codex-specific because it depends on the Codex Chrome Extension controlling the user's logged-in Chrome session.
+Oracle sends its prompt to both OpenAI and Anthropic. An explicit Oracle request
+authorizes relevant nonsensitive context, but credentials, private identifiers,
+medical or financial details, private messages, browsing history, and personal
+files require specific approval before transmission to both providers.

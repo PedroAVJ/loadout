@@ -5,8 +5,8 @@ Codex- and Claude Code-friendly shape.
 
 Available now:
 
-- [`oracle`](./oracle): second-opinion workflow through the user's logged-in
-  ChatGPT Pro session (GPT-5.5 Pro) in Chrome, driven by Computer Use.
+- [`oracle`](./oracle): Codex-hosted two-model council using GPT-5.6 Sol Pro in
+  the user's logged-in ChatGPT session and Claude Fable 5 through Claude Code.
 - [`gmail-cli`](./gmail-cli): raw Gmail message, MIME, and attachment workflows
   through the authenticated `gws` CLI.
 - [`google-drive-cli`](./google-drive-cli): Drive search, download, export,
