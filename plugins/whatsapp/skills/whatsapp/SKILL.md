@@ -74,6 +74,8 @@ Always show the user the full draft text verbatim in chat, quoted per recipient,
 
 Live sends require explicit approval of the exact recipient and message in the current context.
 
+Pace multi-recipient sends like a human. Never fire bridge sends back-to-back: wait at least 60 seconds between recipients, and several minutes per send when the recipients have no prior chat history or the messages contain links, attachments, or credentials. Burst sends from a linked device match WhatsApp's bot-spam signature and can get the linked device deregistered, killing the bridge session until the user relinks by QR.
+
 Fallback commands:
 
 ```bash
@@ -88,6 +90,7 @@ whatsapp --json drafts send DRAFT_ID --confirm
 - Do not transcribe every audio message returned by a listing; transcription is
   opt-in for the particular audio message needed to answer the task.
 - Never live-send with `--confirm` unless the user approved the exact recipient and exact message in the current conversation.
+- Never send to multiple recipients without spacing the sends; see the pacing rule above. Batch approval is not batch dispatch.
 - Use `--json` whenever reading command output for analysis.
 - Prefer metadata-only discovery with `--no-last-message` before reading message contents.
 - Do not show raw JIDs or LIDs unless debugging internals.
