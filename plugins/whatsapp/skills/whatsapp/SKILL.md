@@ -70,6 +70,8 @@ Drafts must sound like the user actually writes in that chat. Mirror the user's 
 
 When the target chat is known or can be resolved cheaply, create the reviewable local draft with `whatsapp --json drafts create ...` and report the draft id. If the target chat is genuinely unclear, ask for the recipient before drafting instead of guessing.
 
+Always show the user the full draft text verbatim in chat, quoted per recipient, together with its draft id. A draft id alone is not reviewable; never ask the user to approve a draft they have not seen word for word in the conversation.
+
 Live sends require explicit approval of the exact recipient and message in the current context.
 
 Fallback commands:
