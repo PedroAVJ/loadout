@@ -1,6 +1,6 @@
 {
   "name": "@swe-stack/whatsapp",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "private": false,
   "description": "Agent-first WhatsApp plugin and CLI for Codex and Claude Code.",
   "license": "MIT",

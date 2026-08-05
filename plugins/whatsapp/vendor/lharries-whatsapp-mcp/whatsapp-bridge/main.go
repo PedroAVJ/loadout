@@ -854,6 +854,31 @@ func applyReplyContext(msg *waProto.Message, contextInfo *waProto.ContextInfo) {
 	}
 }
 
+func resolveOutboundMediaType(mediaPath string) (whatsmeow.MediaType, string) {
+	switch strings.ToLower(filepath.Ext(mediaPath)) {
+	case ".jpg", ".jpeg":
+		return whatsmeow.MediaImage, "image/jpeg"
+	case ".png":
+		return whatsmeow.MediaImage, "image/png"
+	case ".gif":
+		return whatsmeow.MediaImage, "image/gif"
+	case ".webp":
+		return whatsmeow.MediaImage, "image/webp"
+	case ".ogg":
+		return whatsmeow.MediaAudio, "audio/ogg; codecs=opus"
+	case ".mp4":
+		return whatsmeow.MediaVideo, "video/mp4"
+	case ".avi":
+		return whatsmeow.MediaVideo, "video/avi"
+	case ".mov":
+		return whatsmeow.MediaVideo, "video/quicktime"
+	case ".pdf":
+		return whatsmeow.MediaDocument, "application/pdf"
+	default:
+		return whatsmeow.MediaDocument, "application/octet-stream"
+	}
+}
+
 // Function to send a WhatsApp message
 func sendWhatsAppMessage(client *whatsmeow.Client, messageStore *MessageStore, recipient string, message string, mediaPath string, reply ReplyMetadata) (bool, string) {
 	if !client.IsConnected() {
@@ -892,48 +917,7 @@ func sendWhatsAppMessage(client *whatsmeow.Client, messageStore *MessageStore, r
 			return false, fmt.Sprintf("Error reading media file: %v", err)
 		}
 
-		// Determine media type and mime type based on file extension
-		fileExt := strings.ToLower(mediaPath[strings.LastIndex(mediaPath, ".")+1:])
-		var mediaType whatsmeow.MediaType
-		var mimeType string
-
-		// Handle different media types
-		switch fileExt {
-		// Image types
-		case "jpg", "jpeg":
-			mediaType = whatsmeow.MediaImage
-			mimeType = "image/jpeg"
-		case "png":
-			mediaType = whatsmeow.MediaImage
-			mimeType = "image/png"
-		case "gif":
-			mediaType = whatsmeow.MediaImage
-			mimeType = "image/gif"
-		case "webp":
-			mediaType = whatsmeow.MediaImage
-			mimeType = "image/webp"
-
-		// Audio types
-		case "ogg":
-			mediaType = whatsmeow.MediaAudio
-			mimeType = "audio/ogg; codecs=opus"
-
-		// Video types
-		case "mp4":
-			mediaType = whatsmeow.MediaVideo
-			mimeType = "video/mp4"
-		case "avi":
-			mediaType = whatsmeow.MediaVideo
-			mimeType = "video/avi"
-		case "mov":
-			mediaType = whatsmeow.MediaVideo
-			mimeType = "video/quicktime"
-
-		// Document types (for any other file type)
-		default:
-			mediaType = whatsmeow.MediaDocument
-			mimeType = "application/octet-stream"
-		}
+		mediaType, mimeType := resolveOutboundMediaType(mediaPath)
 
 		// Upload media to WhatsApp servers
 		resp, err := client.Upload(context.Background(), mediaData, mediaType)

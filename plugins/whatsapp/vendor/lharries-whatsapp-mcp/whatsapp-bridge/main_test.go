@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"go.mau.fi/whatsmeow"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
 	"go.mau.fi/whatsmeow/types/events"
@@ -264,6 +265,46 @@ func TestExtractTextContentReadsMediaCaptions(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := extractTextContent(tt.msg); got != tt.want {
 				t.Fatalf("extractTextContent() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestResolveOutboundMediaType(t *testing.T) {
+	tests := []struct {
+		name          string
+		path          string
+		wantMediaType whatsmeow.MediaType
+		wantMIMEType  string
+	}{
+		{
+			name:          "PDF is an actual PDF document",
+			path:          "/tmp/Guide.PDF",
+			wantMediaType: whatsmeow.MediaDocument,
+			wantMIMEType:  "application/pdf",
+		},
+		{
+			name:          "JPEG remains an image",
+			path:          "/tmp/photo.jpg",
+			wantMediaType: whatsmeow.MediaImage,
+			wantMIMEType:  "image/jpeg",
+		},
+		{
+			name:          "unknown documents remain generic binary",
+			path:          "/tmp/archive.unknown",
+			wantMediaType: whatsmeow.MediaDocument,
+			wantMIMEType:  "application/octet-stream",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mediaType, mimeType := resolveOutboundMediaType(tt.path)
+			if mediaType != tt.wantMediaType {
+				t.Fatalf("mediaType = %v, want %v", mediaType, tt.wantMediaType)
+			}
+			if mimeType != tt.wantMIMEType {
+				t.Fatalf("mimeType = %q, want %q", mimeType, tt.wantMIMEType)
 			}
 		})
 	}

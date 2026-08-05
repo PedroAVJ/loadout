@@ -1,6 +1,6 @@
 {
   "name": "whatsapp",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "Work with WhatsApp chats, message context, media, and reviewable drafts.",
   "author": {
     "name": "PedroAVJ",
