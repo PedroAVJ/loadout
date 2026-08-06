@@ -5,7 +5,7 @@ visual-design collaborator.
 
 Codex owns this wrapper as a stewardship layer: prompts, logs, diff review,
 cleanup, verification, and final shipping judgment stay under Codex control.
-Claude Fable owns the first implementation pass for browser-visible product UI
+Claude Opus 5 owns the first implementation pass for browser-visible product UI
 and provides visual-artifact direction for the explainer workflow.
 
 This project is unofficial and is not affiliated with Anthropic.
@@ -13,13 +13,15 @@ This project is unofficial and is not affiliated with Anthropic.
 ## Workflow rule of thumb
 
 - Use the mandatory frontend UI skill for application UI and frontend work.
-- Claude Fable makes the first visible implementation pass; Codex stewards it.
+- Claude Opus 5 makes the first visible implementation pass; Codex stewards it.
 - Use the explainer skill for a standalone designed HTML explanation.
 
 ## Model selection
 
-The wrapper passes the stable `fable` alias by default. A caller may explicitly
-override it with `--model`.
+The wrapper passes the canonical `claude-opus-5` identifier by default. A
+caller may explicitly override it with `--model`, but the mandatory frontend
+UI workflow pins the canonical identifier rather than relying on a mutable
+alias.
 
 ## Included surfaces
 

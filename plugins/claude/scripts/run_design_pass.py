@@ -15,7 +15,7 @@ DEFAULT_TEMPLATES = {
     "implement": PLUGIN_ROOT / "templates" / "frontend-implementation.md",
 }
 DEFAULT_LOG_ROOT = pathlib.Path.home() / ".local" / "share" / "claude-plugin" / "design-logs"
-DEFAULT_MODEL = "fable"
+DEFAULT_MODEL = "claude-opus-5"
 
 
 def extract_text(value):

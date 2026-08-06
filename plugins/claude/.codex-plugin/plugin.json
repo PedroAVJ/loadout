@@ -1,6 +1,6 @@
 {
   "name": "claude",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Use Claude Code from Codex for stewarded frontend implementation and visual explainer workflows.",
   "author": {
     "name": "PedroAVJ",
@@ -18,8 +18,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Claude",
-    "shortDescription": "Build frontend UI with Claude Fable",
-    "longDescription": "Use Claude Fable for the first implementation pass on browser-visible product UI and for visual direction on polished single-file HTML explainers. Codex remains responsible for scope, diff review, cleanup, verification, and shipping judgment.",
+    "shortDescription": "Build frontend UI with Claude Opus 5",
+    "longDescription": "Use Claude Opus 5 for the first implementation pass on browser-visible product UI and for visual direction on polished single-file HTML explainers. Codex remains responsible for scope, diff review, cleanup, verification, and shipping judgment.",
     "developerName": "PedroAVJ",
     "category": "Productivity",
     "capabilities": [
@@ -31,7 +31,7 @@
     "privacyPolicyURL": "https://www.anthropic.com/legal/privacy",
     "termsOfServiceURL": "https://www.anthropic.com/legal/consumer-terms",
     "defaultPrompt": [
-      "Ask Claude Fable to implement a UI pass",
+      "Ask Claude Opus 5 to implement a UI pass",
       "Make an HTML explainer"
     ],
     "brandColor": "#D97757",
