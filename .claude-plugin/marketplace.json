@@ -117,6 +117,13 @@
       "category": "productivity",
       "source": "./plugins/voice-memos",
       "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/voice-memos"
+    },
+    {
+      "name": "call-recordings",
+      "description": "Read Apple call recordings out of the macOS Notes store — calls, timing, audio paths, and Apple's transcripts.",
+      "category": "productivity",
+      "source": "./plugins/call-recordings",
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/call-recordings"
     }
   ]
 }

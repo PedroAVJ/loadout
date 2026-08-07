@@ -1,0 +1,44 @@
+#!/bin/sh
+set -eu
+
+script="$0"
+while [ -L "$script" ]; do
+  dir="$(CDPATH= cd -- "$(dirname -- "$script")" && pwd)"
+  link="$(readlink "$script")"
+  case "$link" in
+    /*) script="$link" ;;
+    *) script="$dir/$link" ;;
+  esac
+done
+
+plugin_root="$(CDPATH= cd -- "$(dirname -- "$script")/.." && pwd)"
+
+usage() {
+  cat <<'USAGE'
+Usage: call-recordings <command> [options]
+
+Commands:
+  list        List Apple call recordings from the macOS Notes store
+  path        Print the absolute audio path for a call
+  transcript  Print Apple's transcript from the call note, if any
+  doctor      Check store access and report audio belonging to no call
+
+Run "call-recordings <command> --help" for options.
+Requires Full Disk Access to read the Notes container.
+USAGE
+}
+
+command="${1:-}"
+case "$command" in
+  list | path | transcript | doctor)
+    exec python3 "$plugin_root/scripts/call_recordings.py" "$@"
+    ;;
+  help | -h | --help | "")
+    usage
+    ;;
+  *)
+    printf 'call-recordings: unknown command "%s"\n\n' "$command" >&2
+    usage >&2
+    exit 2
+    ;;
+esac

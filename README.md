@@ -36,6 +36,7 @@ It is intentionally practical:
 | [`plugins/macbook`](./plugins/macbook) | Open | MacBook heat, memory pressure, and disk headroom as three separate read-only diagnoses. |
 | [`plugins/codex-app`](./plugins/codex-app) | Open | Read the local Codex desktop app's internals for feature flags and gated behavior; patch and restore the bundle when necessary. |
 | [`plugins/voice-memos`](./plugins/voice-memos) | Open | Read the macOS Voice Memos store — recordings, metadata, and Apple's embedded transcripts. |
+| [`plugins/call-recordings`](./plugins/call-recordings) | Open | Read Apple call recordings out of the macOS Notes store — calls, timing, audio paths, and Apple's transcripts. |
 
 More modules will land here as the custom stack gets cleaned up for public use.
 
@@ -97,12 +98,13 @@ plugins/claude
 plugins/android-phone
 plugins/symphony
 plugins/voice-memos
+plugins/call-recordings
 ```
 
 Or from the CLI:
 
 ```bash
-codex plugin marketplace add PedroAVJ/loadout --ref main --sparse .agents/plugins --sparse plugins/loadout --sparse plugins/google-cloud --sparse plugins/macbook --sparse plugins/codex-app --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/youtube-cli --sparse plugins/youtube-music --sparse plugins/elevenlabs --sparse plugins/claude --sparse plugins/android-phone --sparse plugins/symphony --sparse plugins/voice-memos
+codex plugin marketplace add PedroAVJ/loadout --ref main --sparse .agents/plugins --sparse plugins/loadout --sparse plugins/google-cloud --sparse plugins/macbook --sparse plugins/codex-app --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/youtube-cli --sparse plugins/youtube-music --sparse plugins/elevenlabs --sparse plugins/claude --sparse plugins/android-phone --sparse plugins/symphony --sparse plugins/voice-memos --sparse plugins/call-recordings
 codex plugin marketplace upgrade
 ```
 
@@ -111,7 +113,7 @@ Leave sparse paths blank if you want Codex to fetch the whole marketplace repo. 
 ### Install In Claude Code
 
 ```bash
-claude plugin marketplace add PedroAVJ/loadout --sparse .claude-plugin --sparse plugins/loadout --sparse plugins/google-cloud --sparse plugins/macbook --sparse plugins/codex-app --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/youtube-cli --sparse plugins/youtube-music --sparse plugins/elevenlabs --sparse plugins/android-phone --sparse plugins/symphony --sparse plugins/voice-memos
+claude plugin marketplace add PedroAVJ/loadout --sparse .claude-plugin --sparse plugins/loadout --sparse plugins/google-cloud --sparse plugins/macbook --sparse plugins/codex-app --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/youtube-cli --sparse plugins/youtube-music --sparse plugins/elevenlabs --sparse plugins/android-phone --sparse plugins/symphony --sparse plugins/voice-memos --sparse plugins/call-recordings
 claude plugin install loadout@loadout
 ```
 
