@@ -1,0 +1,38 @@
+{
+  "name": "sentry",
+  "version": "0.1.0",
+  "description": "Read and triage Sentry through the sentry CLI from Codex.",
+  "author": {
+    "name": "PedroAVJ",
+    "url": "https://github.com/PedroAVJ"
+  },
+  "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/sentry",
+  "repository": "https://github.com/PedroAVJ/loadout",
+  "license": "MIT",
+  "keywords": [
+    "sentry",
+    "observability",
+    "error-tracking",
+    "logs",
+    "triage"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Sentry",
+    "shortDescription": "Read and triage Sentry through the sentry CLI",
+    "longDescription": "Query Sentry issues, events, logs, traces, and replays through the sentry CLI, with the surface distinctions and environment pitfalls that make the difference between a correct answer and a confident wrong one.",
+    "developerName": "PedroAVJ",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read"
+    ],
+    "websiteURL": "https://github.com/PedroAVJ/loadout/tree/main/plugins/sentry",
+    "defaultPrompt": [
+      "What is erroring in production right now",
+      "Show me unresolved Sentry issues from the last 14 days",
+      "What do the Sentry logs say for this project"
+    ],
+    "brandColor": "#362D59",
+    "screenshots": []
+  }
+}

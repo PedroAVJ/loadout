@@ -124,6 +124,13 @@
       "category": "productivity",
       "source": "./plugins/call-recordings",
       "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/call-recordings"
+    },
+    {
+      "name": "sentry",
+      "description": "Read and triage Sentry through the sentry CLI — issues, events, logs, traces, and the distinctions between them.",
+      "category": "productivity",
+      "source": "./plugins/sentry",
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/sentry"
     }
   ]
 }
