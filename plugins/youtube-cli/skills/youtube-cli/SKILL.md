@@ -33,7 +33,7 @@ by paying — only by a manual compliance audit. Budget accordingly:
 | Operation | Units | Per day |
 | --- | --- | --- |
 | any `list` (`playlists`, `playlistItems`, `videos`, `channels`, `subs`) | 1 | ~10,000 |
-| any write (`create`, `delete`, `items add/remove/move`) | 50 | ~200 |
+| any write (`create`, `delete`, `items add/remove/move`, `subs remove`) | 50 | ~200 |
 | `search` | 100 | ~100 |
 
 ```bash
@@ -54,7 +54,7 @@ ytx playlists list
 ytx playlists show "workout"          # resolves by title fragment once synced
 ytx playlists show PLxxxxxxxx
 ytx liked --pages 2
-ytx subs
+ytx subs list
 ytx video dQw4w9WgXcQ https://youtu.be/QHM-ixZrs9M
 ```
 
@@ -86,8 +86,8 @@ snapshot, not a live view.
 
 ## Writes
 
-Ask before creating, deleting, adding, removing, or reordering unless the user
-already made that action explicit. Deleting a playlist additionally requires
+Ask before creating, deleting, adding, removing, reordering, or unsubscribing
+unless the user already made that action explicit. Deleting a playlist additionally requires
 `--yes`; do not pass it on the user's behalf without a clear instruction.
 
 ```bash
@@ -97,6 +97,7 @@ ytx items add "Focus" https://www.youtube.com/watch?v=VIDEO_ID
 ytx items remove "Focus" VIDEO_ID
 ytx items move "Focus" VIDEO_ID --position 0
 ytx playlists delete PLxxxx --yes
+ytx subs remove "Channel Name"        # or a channel ID
 ```
 
 New playlists default to `private`. After an approved mutation, read the

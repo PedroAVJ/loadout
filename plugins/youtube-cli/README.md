@@ -42,7 +42,8 @@ ytx playlists create "Focus" --privacy private
 ytx playlists delete PLxxxx --yes
 
 ytx liked --pages 2
-ytx subs
+ytx subs list
+ytx subs remove "Channel Name"
 ytx video dQw4w9WgXcQ
 ytx search "query" --yes                         # 100 units, gated on purpose
 ```

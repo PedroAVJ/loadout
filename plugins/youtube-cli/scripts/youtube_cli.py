@@ -57,6 +57,7 @@ QUOTA_COSTS = {
     "videos.list": 1,
     "channels.list": 1,
     "subscriptions.list": 1,
+    "subscriptions.delete": 50,
     "search.list": 100,
 }
 
@@ -742,20 +743,50 @@ def cmd_liked(args: argparse.Namespace) -> None:
     emit(rows, [("video_id", "VIDEO", 11), ("title", "TITLE", 56), ("channel_title", "CHANNEL", 26)], args.json)
 
 
-def cmd_subs(args: argparse.Namespace) -> None:
-    rows = [
+def fetch_subscriptions(pages: int = 10) -> list[dict[str, Any]]:
+    return [
         {
+            "id": item["id"],
             "channel_id": item["snippet"]["resourceId"]["channelId"],
             "title": item["snippet"]["title"],
+            "subscribed_at": item["snippet"].get("publishedAt", ""),
         }
         for item in api_pages(
             "subscriptions.list",
             "subscriptions",
             {"part": "snippet", "mine": "true", "maxResults": 50, "order": "alphabetical"},
-            max_pages=args.pages,
+            max_pages=pages,
         )
     ]
-    emit(rows, [("channel_id", "CHANNEL ID", 26), ("title", "TITLE", 50)], args.json)
+
+
+def cmd_subs_list(args: argparse.Namespace) -> None:
+    emit(
+        fetch_subscriptions(args.pages),
+        [("subscribed_at", "SUBSCRIBED", 20), ("title", "TITLE", 40), ("channel_id", "CHANNEL ID", 26)],
+        args.json,
+    )
+
+
+def cmd_subs_remove(args: argparse.Namespace) -> None:
+    subscriptions = fetch_subscriptions()
+    removed = []
+    for wanted in args.channels:
+        needle = wanted.strip().lower()
+        matches = [
+            s
+            for s in subscriptions
+            if s["channel_id"].lower() == needle or needle in s["title"].lower()
+        ]
+        if not matches:
+            die(f"no subscription matched {wanted!r}")
+        if len(matches) > 1:
+            options = "\n".join(f"  {m['channel_id']}  {m['title']}" for m in matches)
+            die(f"{wanted!r} matched {len(matches)} subscriptions:\n{options}")
+        target = matches[0]
+        api("subscriptions.delete", "subscriptions", {"id": target["id"]})
+        removed.append({"channel_id": target["channel_id"], "title": target["title"]})
+    print(json.dumps(removed, indent=2, ensure_ascii=False))
 
 
 def cmd_search(args: argparse.Namespace) -> None:
@@ -979,9 +1010,15 @@ def build_parser() -> argparse.ArgumentParser:
     liked.add_argument("--pages", type=int, default=5, help="pages of 50 to fetch (default 5)")
     liked.set_defaults(func=cmd_liked)
 
-    subs = subparsers.add_parser("subs", help="list subscriptions", parents=[common])
-    subs.add_argument("--pages", type=int, default=5)
-    subs.set_defaults(func=cmd_subs)
+    subs = subparsers.add_parser("subs", help="subscriptions").add_subparsers(
+        dest="subs_command", required=True
+    )
+    subs_list = subs.add_parser("list", help="list your subscriptions", parents=[common])
+    subs_list.add_argument("--pages", type=int, default=5)
+    subs_list.set_defaults(func=cmd_subs_list)
+    subs_remove = subs.add_parser("remove", help="unsubscribe from channels")
+    subs_remove.add_argument("channels", nargs="+", help="channel IDs or title fragments")
+    subs_remove.set_defaults(func=cmd_subs_remove)
 
     search = subparsers.add_parser("search", help="search YouTube (100 units per call)", parents=[common])
     search.add_argument("query")
