@@ -142,8 +142,9 @@ Do not:
 - change Drive permissions or public sharing without explicit approval
 - delete or modify source files in app-managed storage (Notes, Voice Memos)
 
-If Pedro asks for Linear follow-up after this capture, use the evidence
-pointers with the downstream Symphony requirements skills.
+The next step after capture is `analysis`, which classifies the requirements and
+creates the Linear batch. Hand it the evidence pointers; do not pre-empt it by
+extracting requirements here.
 
 ## Preferred Output
 

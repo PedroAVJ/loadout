@@ -1,7 +1,7 @@
 {
   "name": "codex",
-  "version": "0.2.0",
-  "description": "Work with OpenAI Codex from Claude Code: read the local Codex desktop app's internals, and patch or restore its bundle when necessary.",
+  "version": "0.3.0",
+  "description": "Work with OpenAI Codex from Claude Code: hand work to Codex for rescue and review, and inspect or patch the local Codex desktop app.",
   "author": {
     "name": "PedroAVJ",
     "url": "https://github.com/PedroAVJ"
@@ -13,6 +13,8 @@
     "codex",
     "chatgpt",
     "openai",
+    "rescue",
+    "review",
     "electron",
     "asar",
     "macos",

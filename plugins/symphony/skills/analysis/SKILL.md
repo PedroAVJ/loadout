@@ -1,6 +1,6 @@
 ---
 name: analysis
-description: "Use when Pedro wants Symphony to analyze requirements: apply the SWEBOK definition of a requirement and deliver one requirements table (classified along the kept SWEBOK dimensions, with allocation-minted derived rows and a blocked-by column), a conflicts list typed by SWEBOK's three conflict types, and a logical data-model diff when the requirements reshape data. Persist the final analysis as a source-scoped repo ledger when a target product repo is available. Allocation runs under the hood, never as output."
+description: "Use when Pedro wants Symphony to analyze requirements: apply the SWEBOK definition of a requirement and deliver one requirements table (classified along the kept SWEBOK dimensions, with allocation-minted derived rows and a blocked-by column), a conflicts list typed by SWEBOK's three conflict types, and a logical data-model diff when the requirements reshape data. Every surviving requirement becomes one Linear issue in Backlog, with derivation, blocked-by, and conflicts carried as Linear relations. Allocation runs under the hood, never as output."
 ---
 
 # Symphony Requirements Analysis
@@ -39,9 +39,9 @@ writing a row. When the source demonstrates behavior the product already
 exhibits and the stakeholder confirms it — a demo walkthrough, a
 re-confirmation — that is validation evidence, not a candidate:
 
-- annotate the prior ledger row that captured the requirement (update in
-  place, source-attributed), or
-- leave nothing when no prior row exists — git history is the record of
+- comment on the existing Linear issue that captured the requirement,
+  source-attributed, or
+- leave nothing when no prior issue exists — git history is the record of
   shipped behavior.
 
 A demonstrated behavior still earns a row when something remains demanded:
@@ -125,6 +125,12 @@ Analysis runs as a pipeline with one feedback loop:
 5. When the final rows reshape data, render the conceptual model from
    that final row set — after conflicts, so the diff reflects every row
    that survived.
+6. Flush the surviving rows to Linear as one batch (see Linear Is The
+   Record) — after the Codex pass, so nothing it kills gets an issue.
+
+Steps 1–5 are one sitting, not separable lanes: allocation feeds back into
+classification, and conflicts cannot be checked until allocation has finished
+minting rows. Do not split them across skills or across threads.
 
 ## Allocation
 
@@ -137,6 +143,14 @@ are feature-area boxes — for TradeInCode: monitoring, trips, customs,
 IntegratorAPI, Nova frontend, and so on — never implementation mechanisms
 (mutation vs EF hook vs background job is design inside the box, below
 this skill; do not design inside the boxes).
+
+A system is not always software. SWEBOK's definition is a property exhibited by
+*something* that solves a real-world problem, so a system may be composed of
+software, tools, processes, and people — a Power Automate flow to stand up, a
+process to change, a person who has to start doing something. Allocate those to
+the tool, process, or role that owns them. The pass is identical; only the
+vocabulary of the boxes changes. Do not force non-software work into code
+components, and do not drop it because no repo owns it.
 
 The point of the pass is to discover requirements the source does not
 contain: when a component cannot satisfy its requirement without something
@@ -178,53 +192,77 @@ The deliverable is one requirements table plus a conflicts list:
 - Conceptual model: when the rows reshape data, a logical data-model diff
   (see Conceptual Modeling) delivered as a rendered artifact.
 
-Present the complete table and conflicts list in chat. Do not replace the
-deliverable with a summary, selected rows, or a link to the persisted file.
-Pedro uses the complete candidate set to choose which item to specify next.
+Present the complete table and conflicts list in chat, then the created issues.
+Do not replace the deliverable with a summary, selected rows, or a bare link to
+Linear. Pedro uses the complete candidate set to choose which item to specify
+next, and the table is the surface he negotiates against — killing a row,
+blocking one pending someone's input, asking for the data model to understand a
+cluster. Those corrections land in Linear the same way re-analysis does: update
+in place, cancel what died.
 
-## Repository Ledger
+The table is a view of the issues, not a second copy of them. When the two
+disagree, Linear is right.
 
-When a target product repo is available, persist the final analysis under:
+Running unattended does not change what gets written. The issues are created on
+the automated run so they already exist when Pedro opens the thread; Backlog
+already says they are unfinished, and holding them back would leave the work
+nowhere.
 
-```text
-docs/requirements-analysis/YYYY-MM-DD[-to-YYYY-MM-DD]-topic.md
-```
+## Linear Is The Record
 
-The date or date range identifies the source evidence, not the day the file is
-written. Use a stable, source-scoped filename so re-analysis of the same source
-updates the same ledger instead of creating copies.
+Linear holds the requirements. There is no parallel file that also holds them —
+a second copy is a second thing to keep in sync, and it will drift.
 
-The file begins with:
+Every requirement that survives the flow becomes exactly one Linear issue, in
+**Backlog**. Backlog is the requirement state: the row exists, it is still being
+worked out, and nothing about it is specified. Promotion to **Todo** is the
+specification step and it is Pedro's, per issue — that transition is what
+authorizes implementation, and nothing this skill does may substitute for it.
 
-- an explicit `Analysis only — not approved implementation scope` status;
-- links or repo-relative paths to every canonical source;
-- the analysis date; and
-- a short statement that row IDs are discussion references, not Linear issue
-  IDs, and do not authorize implementation.
+Row IDs (R1, R2…) are discussion references for the chat table only. They are
+how blocked-by and conflicts get stated before the issues exist. Once the batch
+is created, Linear issue IDs are the identifiers; do not carry row IDs forward
+as if they were durable.
 
-Then write the same complete requirements table and conflicts list presented in
-chat. Number the final reconciled table contiguously from R1 before first
-persisting it — rows dropped during drafting (including the Codex pass) leave
-no gaps. Identifier stability begins at first persist: from then on keep row
-identifiers stable, and a row removed by later re-analysis leaves its gap so
-surviving references hold. When later evidence
-changes the analysis, update the row with its source attribution intact; never
-silently harden a hedge into an approved specification.
+### Structure Carries The Analysis
 
-If `docs/requirements-analysis/README.md` does not exist, create it. It must
-explain this lifecycle:
+The classification output is not prose in a body — it maps onto Linear:
 
-```text
-source evidence -> analysis ledger -> Pedro chooses and specifies a candidate
--> Linear implementation work
-```
+- **Derivation** — a derived requirement is a **sub-issue** of its parent. If
+  the parent dies, the child dies with it. Imposed and emergent requirements are
+  top-level; the body names the stakeholder (imposed) or says the property is
+  only verifiable end-to-end (emergent).
+- **Blocked-by** — Linear **blocking relations**, one per entry in the column.
+  This is the build order allocation left behind.
+- **Conflicts** — a **related** relation between the two issues involved, plus a
+  line in each body naming which of SWEBOK's three conflict types it is and what
+  the incompatibility actually is. A conflict that lives only in the chat
+  transcript is lost the moment the thread ends.
+- **Functional/nonfunctional, product/process, scope** — a short classification
+  block in the body. Not labels: the workspace label convention is one repo
+  label per issue (see the `linear` skill), and classification would flood it.
 
-The README must say plainly that analysis ledgers are not approved scope,
-Linear issues, implementation authorization, or delivery-status records.
+Do not set a priority (`linear` skill, standing convention). Apply the one repo
+label for the originating repo; for work with no product repo — workplace
+process, career, personal-system requirements — that label is `exocortex`.
 
-If there is no target repo, or the environment is read-only, return the complete
-analysis in chat and say that it was not persisted. Do not invent a repo or
-write outside the product repo.
+### Traceability And Re-Analysis
+
+Every issue body cites its source: transcript path, timestamp or quoted line,
+and the speaker who imposed it. This is a requirement of the analysis, not a
+nicety — an issue that cannot be traced back to what someone actually said
+cannot be validated against them later.
+
+The source pointer is also the dedup key. Before creating anything, search
+Linear for issues already citing this source and reconcile against them:
+
+- a requirement that still holds → update that issue in place, source
+  attribution intact
+- a requirement the new evidence killed → cancel the issue, do not delete it
+- a newly minted derived requirement → new issue, parented to its parent's issue
+
+Never create a second issue for a requirement that already has one. Never
+silently harden a hedge into a specification while updating.
 
 ## Codex Adversarial Pass
 
@@ -257,19 +295,22 @@ present ONE final analysis. The reconciliation is silent — no changelog,
 no list of adopted or rejected findings; anything that survives the pass
 is already visible in the table itself.
 
-Skip the pass — and say so plainly — when the rescue subagent is
-unavailable or returns nothing (including when this skill runs inside
-Codex itself, where self-review adds nothing). Never fabricate a critique
-on Codex's behalf.
+When this skill runs inside Codex itself, invert the pass rather than dropping
+it: dispatch the same critique brief to Claude. Self-review adds nothing, but
+the asymmetry is the point and it holds in both directions — the unattended
+meeting run happens in Codex, and that is precisely the run with nobody in the
+chair to catch a bad row before it becomes an issue.
+
+Skip the pass — and say so plainly in the output — only when neither reviewer
+is reachable. Never fabricate a critique on the other model's behalf.
 
 ## Contract
 
 - Analysis is a classification and allocation pass over already captured or
-  elicited requirements. Answer in chat and, when possible, persist the final
-  analysis ledger in the target product repo.
-- The only write this skill authorizes is the requirements-analysis Markdown
-  artifact and its directory README. The Codex adversarial pass remains
-  review-only and makes no edits.
-- No Linear writes and no product-code writes from this skill.
-- A candidate row never authorizes implementation. Pedro's follow-up
-  conversation is the specification step; he chooses what proceeds.
+  elicited requirements. Answer in chat and create the Linear batch.
+- The writes this skill authorizes are Linear issues in Backlog and their
+  relations, plus updates and cancellations to issues it previously created from
+  the same source. The Codex adversarial pass remains review-only.
+- No product-code writes, no promotion to Todo, no implementation dispatch.
+- A Backlog issue never authorizes implementation. Pedro's follow-up
+  conversation is the specification step; promoting to Todo is how he says so.

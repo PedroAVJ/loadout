@@ -70,7 +70,11 @@ Use the narrower Symphony skills when the request names a lane:
   (functional/nonfunctional, derivation, product/process, scope) into one
   requirements table with a blocked-by column, allocation running under
   the hood to mint derived rows, plus a conflicts list typed by SWEBOK's
-  three conflict types; in-thread only, no writes.
+  three conflict types. Every surviving requirement is created as one Linear
+  issue in Backlog, with derivation as sub-issues, blocked-by as blocking
+  relations, and conflicts as related relations. Backlog means the requirement
+  is still being worked out; promotion to Todo is specification and it is
+  Pedro's call.
 - `requirements-elicitation`: extract grounded requirements into approved Linear
   work packets before implementation.
 - `implementation-dispatch`: create a separate Codex implementation thread from

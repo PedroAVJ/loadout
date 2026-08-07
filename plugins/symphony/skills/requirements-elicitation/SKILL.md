@@ -1,6 +1,6 @@
 ---
 name: requirements-elicitation
-description: "Use when Pedro wants Symphony to turn messy stakeholder input, WhatsApp messages, meeting/email evidence, screenshots, docs, or repo context into Linear work packets before implementation. This skill elicits the whole source in one pass, creates all candidate issues as Linear drafts in a single batch for Pedro to review in Linear, and does not write product code."
+description: "Use when Pedro wants Symphony to turn messy stakeholder input, WhatsApp messages, meeting/email evidence, screenshots, docs, or repo context into Linear work packets before implementation. This skill elicits the whole source in one pass, creates all candidate issues in Linear Backlog in a single batch for Pedro to review in Linear, and does not write product code."
 ---
 
 # Symphony Requirements Elicitation
@@ -16,9 +16,10 @@ Linear; implementation happens later, usually through
 - Elicit the WHOLE source in one pass and create every actionable candidate as
   a draft Linear issue in a single batch — no per-issue approval gate for
   draft creation.
-- Drafts use the workspace's draft-like state (Triage or Draft if the team has
-  one, else Backlog) — never Todo. Promotion to Todo is Pedro's review
-  decision, per issue, in Linear or in chat.
+- Candidates are created in **Backlog** — never Todo, and not Triage. Backlog is
+  the state for work still being worked out; Triage is an accept/decline gate
+  and forces a binary call per item when the point is to iterate. Promotion to
+  Todo is Pedro's review decision, per issue, in Linear or in chat.
 - Do not write product code, open a PR, merge, deploy, or mark work review-ready
   from this skill.
 - Do not dispatch an implementation thread until Pedro says to implement, pick

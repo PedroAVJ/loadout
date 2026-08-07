@@ -1,6 +1,6 @@
 {
   "name": "codex",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Read the local Codex desktop app's internals, and patch or restore its bundle when necessary.",
   "author": {
     "name": "PedroAVJ",
@@ -23,7 +23,7 @@
   "interface": {
     "displayName": "Codex",
     "shortDescription": "Inspect and patch the local Codex desktop app",
-    "longDescription": "Extract and search the installed Codex desktop app's Electron bundle for feature flags, gated behavior, and config keys without modifying it — and, when explicitly asked, patch the bundle with ASAR integrity repair, ad-hoc re-signing, and a documented restore path. Resolves the app by bundle identifier, so it survives the Codex.app to ChatGPT.app rename.",
+    "longDescription": "Extract and search the installed Codex desktop app's Electron bundle for feature flags, gated behavior, and config keys without modifying it \u2014 and, when explicitly asked, patch the bundle with ASAR integrity repair, ad-hoc re-signing, and a documented restore path. Resolves the app by bundle identifier, so it survives the Codex.app to ChatGPT.app rename.",
     "developerName": "PedroAVJ",
     "category": "Productivity",
     "capabilities": [
