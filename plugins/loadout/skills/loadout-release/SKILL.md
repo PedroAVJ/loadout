@@ -50,8 +50,11 @@ git fetch origin main
 If another checkout is in use, verify its remote is
 `https://github.com/PedroAVJ/loadout.git`.
 
-Leave unrelated untracked installer files alone, such as
-`.codex-marketplace-install.json`.
+Both client checkouts are **sparse**. They only materialize the plugin paths
+they were installed with, so a brand-new plugin is invisible to both clients
+until its path is added — see "Publishing a New Plugin to the Clients" below.
+That step is only needed once per plugin; ordinary version bumps to an
+already-listed plugin do not touch sparse config.
 
 ## Change Checklist
 
@@ -220,6 +223,49 @@ for market, manifest in ((".claude-plugin/marketplace.json", ".claude-plugin"),
     print(market, "| missing:", sorted(disk - listed), "| extra:", sorted(listed - disk))
 PY
 ```
+
+## Publishing a New Plugin to the Clients
+
+Once per new plugin, after it is pushed. Skipping this is the failure mode
+where the repo, both marketplace manifests, and `main` all look correct while
+the install still fails with `Source path does not exist`.
+
+**Claude Code** — add the path, then install:
+
+```bash
+git -C ~/.claude/plugins/marketplaces/loadout sparse-checkout add plugins/<plugin>
+claude plugin marketplace update loadout
+claude plugin install <plugin>@loadout
+```
+
+**Codex** — the sparse path must go in *two* places. `codex plugin
+marketplace upgrade` rewrites `.git/info/sparse-checkout` from the
+`sparse_paths` list in the untracked install record, so a bare
+`git sparse-checkout add` is silently reverted on the next upgrade:
+
+```bash
+python3 - <<'PY'
+import json, os
+p = os.path.expanduser("~/.codex/.tmp/marketplaces/loadout/.codex-marketplace-install.json")
+d = json.load(open(p))
+if "plugins/<plugin>" not in d["sparse_paths"]:
+    d["sparse_paths"].append("plugins/<plugin>")
+    json.dump(d, open(p, "w"), indent=2)
+print(d["sparse_paths"])
+PY
+git -C ~/.codex/.tmp/marketplaces/loadout sparse-checkout add plugins/<plugin>
+codex plugin add <plugin>@loadout
+```
+
+Order matters. `git sparse-checkout add` only materializes a directory that
+the current `HEAD` already contains, so fetch first if the checkout is behind
+— otherwise the command reports success and writes nothing. And `marketplace
+upgrade` will not re-apply sparse paths when its recorded `revision` already
+matches `origin/main`, so it cannot be used to repair this.
+
+`codex plugin add` is required for the first install of any plugin;
+`marketplace upgrade` refreshes snapshots but never installs a plugin that
+was not installed before. Confirm with `codex plugin list | grep <plugin>`.
 
 ## Standalone Skills Release
 

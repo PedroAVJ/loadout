@@ -61,12 +61,13 @@ elsewhere, not when it merely happens to be used there more often:
   that never triggers it costs nothing but a skill missing where it is
   needed costs a whole session.
 
-Known agent identifiers: `codex`, `claude-code`, `cursor`, `zed`, `amp`,
-`opencode`, `windsurf`, `gemini-cli`, `github-copilot`, `cline`, `roo`,
-`kilo`, `crush`, `aider`, `goose`, `antigravity`, `openclaw`, `eve`. Run
-`npx skills add <source> --skill <name> -g` without `-y` to get the
-interactive agent picker and confirm what the current CLI actually supports
-before asserting a target exists.
+The identifiers that matter here are `codex`, `claude-code`, and `universal`
+— the last one being the canonical `~/.agents/skills/` directory itself,
+which most agents read natively. The CLI supports roughly seventy more
+(`cursor`, `zed`, `amp`, `opencode`, `windsurf`, `gemini-cli`, `goose`,
+`aider`, `crush`, and so on). Do not assert that a given target exists from
+memory; pass a deliberately invalid `-a` value and the CLI prints its full
+current list, or drop `-y` for the interactive picker.
 
 `--all` is shorthand for `--skill '*' --agent '*' -y`. Never use it against a
 repo you have not listed first.
@@ -145,8 +146,29 @@ npx skills update -g
 npx skills update <name> -g
 
 # Remove
-npx skills remove <name> -g -a codex -a claude-code
+npx skills remove <name> -g -a universal -a codex -a claude-code
 ```
+
+**`remove` under-reports.** It prints "Successfully removed N skill(s)" after
+unlinking only the per-agent bridges it was pointed at; the canonical copy in
+`~/.agents/skills/<name>/` and the `~/.agents/.skill-lock.json` entry survive.
+`-a '*'` is rejected outright by `remove` despite the help text advertising
+it. Include `-a universal` to reach the canonical directory, then verify
+rather than trusting the exit message:
+
+```bash
+npx skills list -g | grep <name>          # should print nothing
+ls ~/.agents/skills/ | grep <name>        # should print nothing
+```
+
+If either still shows the skill, delete the directory and drop its lockfile
+key by hand. A leftover entry is not cosmetic: it points `update` at a source
+path that may no longer exist, and the stale copy keeps loading into every
+session.
+
+Removing a standalone skill that has since moved into a plugin is exactly
+this case — the lockfile still references the old `skills/<name>/` path, so
+clear it or the plugin copy and the orphan will both be live.
 
 Always install by explicit `--skill <name>`. Against a repo that carries
 plugins, `-s '*'` / `--all` walks the whole tree, discovers plugin-internal
