@@ -2,14 +2,15 @@
 
 Local forensics on the installed macOS Codex desktop app.
 
-Two skills, deliberately split by whether they write to the bundle.
+The bundle skills are split by whether they write to it.
 
 ## Skills
 
 | Skill | Does |
 | --- | --- |
-| `internals` | Extract and search `Codex.app` read-only — feature flags, gated behavior, config keys, IPC surfaces, version. Never writes. |
+| `internals` | Extract and search the app bundle read-only — feature flags, gated behavior, config keys, IPC surfaces, version. Never writes. |
 | `patching` | Modify the bundle: ASAR repack, `ElectronAsarIntegrity` hash repair, ad-hoc re-signing, restore from backup. |
+| `automations` | Where `automation.toml` lives, heartbeat vs cron, why an automation looks missing when it is not, and how plugin/skill changes reach a running app. |
 
 The split matters because the two have completely different costs. Reading
 the bundle is free and reversible by definition. Patching it breaks the

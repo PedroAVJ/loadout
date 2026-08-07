@@ -1,6 +1,6 @@
 {
   "name": "codex",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Work with OpenAI Codex from Claude Code: hand work to Codex for rescue and review, and inspect or patch the local Codex desktop app.",
   "author": {
     "name": "PedroAVJ",

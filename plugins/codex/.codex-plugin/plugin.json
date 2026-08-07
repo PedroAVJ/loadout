@@ -1,6 +1,6 @@
 {
   "name": "codex",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Read the local Codex desktop app's internals, and patch or restore its bundle when necessary.",
   "author": {
     "name": "PedroAVJ",

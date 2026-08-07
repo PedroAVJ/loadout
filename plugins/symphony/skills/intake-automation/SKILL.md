@@ -50,19 +50,24 @@ The lanes:
   the requirements and creates them as Linear Backlog issues. All three audio
   sources converge here; by the time analysis runs it is a transcript with
   attribution either way, and nothing downstream cares which app produced it.
-- **Defect report** — a crash, an alert, a broken behavior someone hit. This is
-  not a requirement and does not get an analysis pass: a stack trace is already
-  unambiguous and verifiable, which is the whole point of analysis. It goes to
-  Linear **Triage**, where the verdict is keep, duplicate, or decline.
+- **Defect report** — a crash, an alert, a broken behavior someone hit. It goes
+  to Linear **Triage**, where the verdict is keep, duplicate, or decline.
   Integration-created issues (Sentry, Slack) land in Triage on their own.
 - **Notify** — Pedro must know or decide something, and no lane owns it yet.
 - **Ignore** — everything else. Silent, recorded in the cursor, no task.
 
-The distinction between the first two lanes is what verdict the arrival needs.
-A defect asks *is this real* — one decision, and Triage exists to take it. A
-meeting asks *what is this actually demanding*, which is a classification
-problem, and no inbox answers it. That is why one gets adjudicated and the other
-gets analyzed.
+The two lanes differ in what verdict the *arrival* needs, not in how much
+thought the work needs. A defect arrives already stating what is wrong, so the
+open question is whether it is real — one decision, and Triage exists to take
+it. A meeting arrives without stating what it demands, so the open question is
+what the requirements even are, and no inbox answers that.
+
+Triage is not a judgment that a bug is trivial. Diagnosis, root cause, and the
+fix can turn on a design decision as large as anything a meeting produces —
+that work just happens after the issue is kept, not before it enters the queue.
+What a defect skips is the elicitation and classification pass: there is no
+stakeholder to attribute it to and no ambiguity about what was asked for. Only
+a live hotfix skips the queue itself.
 
 When the lane is genuinely unclear after reading the content, preserve the
 evidence, mark it pending, and say so in the final report. Do not force an
