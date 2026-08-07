@@ -45,7 +45,13 @@ comparing order, dependencies, or scope between issues.
 
 ## What this skill is not
 
-Client-facing issue elicitation flows (grounding stakeholder input, approval
-gates before creating issues) are governed by their own workflow skills when
-present — this skill covers the workspace-wide mechanics that apply either
-way.
+This covers workspace-wide mechanics that hold for every issue, however it
+was created. Two sibling skills sit above it and neither overrides it:
+
+- `requirements-elicitation` — how issues get *discovered* from stakeholder
+  input, and the approval gate before anything is created.
+- `linear-issue-writer` — what belongs in an issue *body* when Symphony
+  drafts one.
+
+Conventions here (no priorities, one repo label, plain-English references)
+apply to issues from those flows too.

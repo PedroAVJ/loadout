@@ -1,0 +1,42 @@
+{
+  "name": "macbook",
+  "version": "0.1.0",
+  "description": "Diagnose MacBook heat, memory pressure, and disk headroom as three separate questions.",
+  "author": {
+    "name": "PedroAVJ",
+    "url": "https://github.com/PedroAVJ"
+  },
+  "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/macbook",
+  "repository": "https://github.com/PedroAVJ/loadout",
+  "license": "MIT",
+  "keywords": [
+    "macos",
+    "macbook",
+    "performance",
+    "memory",
+    "storage",
+    "thermal",
+    "diagnostics"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "MacBook",
+    "shortDescription": "Diagnose MacBook heat, memory, and storage",
+    "longDescription": "Three separate diagnoses for a MacBook under strain: what is burning CPU and causing fan spin, how close physical memory is to OOM, and where disk space went. Read-only snapshots first, least-destructive cleanup last.",
+    "developerName": "PedroAVJ",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read"
+    ],
+    "brandColor": "#FF2D55",
+    "composerIcon": "./assets/macbook-icon.svg",
+    "logo": "./assets/macbook.png",
+    "screenshots": [],
+    "defaultPrompt": [
+      "Why is my MacBook hot and loud?",
+      "How close am I to running out of RAM?",
+      "Where did my disk space go?"
+    ]
+  }
+}

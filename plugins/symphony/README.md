@@ -61,6 +61,15 @@ HTML, a deliberately scoped intake audit, or a status summary.
 - `merge`
 - `azure-publish-changes`
 - `azure-merge`
+- `linear` (workspace-wide issue conventions)
+- `bdd-test` (behavior contracts paired with Playwright automation)
+
+The last two are standing conventions rather than lifecycle steps. `linear`
+governs every issue in the workspace however it was created — no priorities,
+one repo label, plain-English references — and sits underneath
+`requirements-elicitation` and `linear-issue-writer` rather than competing
+with them. `bdd-test` is the acceptance-criteria format the lifecycle produces
+when a work packet needs a human-reviewable contract.
 
 ## Boundary
 

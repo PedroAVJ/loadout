@@ -1,6 +1,6 @@
 {
   "name": "loadout",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Manage what this agent can do: find, vet, and install skills; install and audit MCP servers; release Loadout plugins.",
   "author": {
     "name": "PedroAVJ",

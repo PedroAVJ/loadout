@@ -1,4 +1,0 @@
-interface:
-  display_name: "Codex App Hacking"
-  short_description: "Patch and inspect the local Codex desktop app safely."
-  default_prompt: "Help me inspect or patch the local Codex desktop app safely."

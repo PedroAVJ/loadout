@@ -75,6 +75,20 @@
       "category": "productivity",
       "source": "./plugins/loadout",
       "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/loadout"
+    },
+    {
+      "name": "macbook",
+      "description": "Diagnose MacBook heat, memory pressure, and disk headroom as three separate questions.",
+      "category": "productivity",
+      "source": "./plugins/macbook",
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/macbook"
+    },
+    {
+      "name": "codex-app",
+      "description": "Inspect the local Codex desktop app's internals, and patch or restore its bundle.",
+      "category": "productivity",
+      "source": "./plugins/codex-app",
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/codex-app"
     }
   ]
 }

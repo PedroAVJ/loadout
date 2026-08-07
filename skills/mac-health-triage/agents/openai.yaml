@@ -1,8 +1,0 @@
-interface:
-  display_name: "Mac Health Triage"
-  short_description: "Diagnose Mac heat, CPU, swap, and agent helper buildup"
-  icon_small: "./assets/mac-health-triage.png"
-  icon_large: "./assets/mac-health-triage.png"
-  brand_color: "#FF2D55"
-  default_prompt: "Use $mac-health-triage to check my Mac CPU, memory, swap, and agent helper processes."
-  allow_implicit_invocation: true
