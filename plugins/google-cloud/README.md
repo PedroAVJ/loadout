@@ -27,14 +27,13 @@ callable, so it wins.
 
 ## The Substrate
 
-One project, `pedro-app-storage-20260801`, three buckets with unrelated jobs:
-
-- `…-public` — published artifacts, agent-writable
-- `…-private` — avanza-control production Postgres backups, **read only**
-- `…-pinggo` — live product-catalog media, **read only**
+Buckets in one project typically serve unrelated jobs — published artifacts,
+backups, live application media — and only the first is ever agent-writable.
 
 The write boundary is the reason this plugin exists. The buckets look
-interchangeable and are not.
+interchangeable and are not. Which project and which buckets is instance
+data: discover it with `gcloud storage ls`, and keep the mapping in your own
+notes rather than here.
 
 ## Bundled CLI
 

@@ -1,6 +1,6 @@
 {
   "name": "google-cloud",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Work with Google Cloud through the gcloud CLI: project inventory, the Cloud Storage substrate, and publishing artifacts to durable URLs.",
   "author": {
     "name": "PedroAVJ",

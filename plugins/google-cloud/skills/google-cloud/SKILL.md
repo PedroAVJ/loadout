@@ -1,6 +1,6 @@
 ---
 name: google-cloud
-description: Work with Pedro's Google Cloud through the gcloud CLI — which projects exist and what each is for, authentication, project scoping, cost-aware querying, and the safety boundary around production resources. Use for any GCP task — inspecting or provisioning resources, checking logs, auditing IAM, or figuring out which project something lives in. For Cloud Storage specifically, see the storage skill.
+description: Work with Google Cloud through the gcloud CLI — discovering which projects exist and what each is for, authentication, project scoping, cost-aware querying, and the safety boundary around production resources. Use for any GCP task — inspecting or provisioning resources, checking logs, auditing IAM, or figuring out which project something lives in. For Cloud Storage specifically, see the storage skill.
 ---
 
 # Google Cloud
@@ -18,23 +18,32 @@ gcloud auth list
 gcloud config list
 ```
 
-## The Projects
+## Projects
 
-Four projects exist. Getting the project wrong is the most common and most
-expensive mistake here, so name it explicitly on every command rather than
-relying on ambient `gcloud config` state.
+Getting the project wrong is the most common and most expensive mistake here.
+Name it explicitly on every command rather than relying on ambient
+`gcloud config` state.
 
-| Project | What it is |
-| --- | --- |
-| `pedro-app-storage-20260801` | **The substrate.** App storage, artifact publishing, and production backups. Three buckets — see the `storage` skill. |
-| `diana-play-publishing-20260505` | Google Play publishing for Diana's app. No buckets. |
-| `gen-lang-client-0997216309` | Gemini API. Carries Vertex/AI-platform staging buckets that are not general-purpose storage. |
-| `inbound-study-429220-m9` | **The personal-agent identity**, display name "Pedro Personal Agent". Holds the Desktop OAuth client behind every `gws` call (Gmail, Drive, Calendar, Docs, Sheets, Tasks, People) and the YouTube Data API behind `ytx`. No buckets. Do not delete — the opaque project ID is permanent and says nothing about what it carries. |
+Project IDs are opaque and permanent — they are auto-generated at creation and
+frequently say nothing about what the project ended up carrying. **Never infer
+a project's purpose from its ID or display name.** Discover it:
 
 ```bash
-gcloud projects list
-gcloud storage ls --project=pedro-app-storage-20260801
+gcloud projects list --format="table(projectId,name,projectNumber)"
+gcloud services list --enabled --project=<project> --format="value(config.name)"
+gcloud storage ls --project=<project>
+gcloud iam service-accounts list --project=<project> --format="value(email)"
 ```
+
+What each project is *for* is instance data and lives in the operator's own
+notes, not in this skill. If the purpose is unclear after the commands above,
+ask rather than assume — and never treat a project as disposable because its
+name looks like a demo or an experiment.
+
+Projects are free, so a tidy-looking consolidation is rarely worth it. Merging
+is a real migration: bucket names and their parent project are permanent, OAuth
+clients and API keys cannot move, and one consent screen per project means
+merging entangles unrelated apps' verification state.
 
 ## Authentication
 
@@ -43,13 +52,14 @@ Two credential paths coexist and they are not interchangeable:
 - **Application Default Credentials** — what local agent work uses. Set up
   with `gcloud auth application-default login`. This is what `publish-file`
   reads.
-- **Service account keys** — used by deployed workloads, notably the
-  avanza-control backup runner on its own server. Never copy a service
-  account key onto this machine to make something work locally; use ADC.
+- **Service account keys** — used by deployed workloads on their own
+  servers. Never copy a service account key onto this machine to make
+  something work locally; use ADC.
 
-Pedro already has a personal GCP project with a published OAuth client, so
+Where a personal GCP project with a published OAuth client already exists,
 adding a new Google API is *enable API → add scope → re-consent*, not a new
-project.
+project. Keep the consent screen's app name meaningful — it is what appears in
+the account's third-party access list.
 
 ```bash
 gcloud auth application-default print-access-token >/dev/null && echo "ADC ok"
@@ -94,18 +104,19 @@ Never run without asking first:
 - IAM grants that widen access (`add-iam-policy-binding` with broad principals
   like `allUsers` or `allAuthenticatedUsers`)
 - Anything that changes billing, quota, or org policy
-- Anything touching `avanza-control` production resources — that is a live
-  client system, and its Postgres backups are the only irreplaceable data in
-  the substrate
+- Anything touching a live client system's production resources, or any
+  bucket holding backups — treat backups as the only irreplaceable data
+  present until proven otherwise
 
 Treat `gcloud` as capable of real destruction, because it is. The CLI's
 breadth is the reason to prefer it and the reason to gate it.
 
 ## Provisioning
 
-Creating resources is in scope when Pedro asks. Keep new resources inside
-`pedro-app-storage-20260801` unless there is a reason not to, name them for
-what they serve, and state the ongoing cost before creating anything billable.
+Creating resources is in scope when asked. Keep new resources inside the
+project already serving that purpose unless there is a reason not to, name
+them for what they serve, and state the ongoing cost before creating anything
+billable.
 
 For buckets specifically, follow the naming and prefix conventions in the
 `storage` skill rather than inventing a layout.

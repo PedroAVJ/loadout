@@ -48,8 +48,9 @@ the `.mjs` directly from a fresh install fails with `Cannot find package
 
 Config resolves in order:
 `GCP_PROJECT_ID` / `GCS_PUBLIC_BUCKET` / `GCS_PRIVATE_BUCKET` from the
-environment or `--env-file`, then `~/.publish-file/config.json`, then
-built-in defaults pointing at `pedro-app-storage-20260801`.
+environment or `--env-file`, then `~/.publish-file/config.json`. There are no
+built-in defaults — an unconfigured install fails with a message naming the
+config path rather than writing to someone else's bucket.
 
 First-time setup:
 

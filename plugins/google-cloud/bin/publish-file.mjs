@@ -11,9 +11,12 @@ import { fileURLToPath } from "node:url";
 import { spawn, spawnSync } from "node:child_process";
 
 export const DEFAULT_CONFIG_PATH = path.join(homedir(), ".publish-file", "config.json");
-export const DEFAULT_PROJECT_ID = "pedro-app-storage-20260801";
-export const DEFAULT_PUBLIC_BUCKET = "pedro-app-storage-20260801-public";
-export const DEFAULT_PRIVATE_BUCKET = "pedro-app-storage-20260801-private";
+// Deliberately empty. Which project and buckets this CLI targets is instance
+// data, not part of the tool — it comes from ~/.publish-file/config.json, the
+// GCP_PROJECT_ID / GCS_PUBLIC_BUCKET / GCS_PRIVATE_BUCKET env vars, or --flags.
+export const DEFAULT_PROJECT_ID = "";
+export const DEFAULT_PUBLIC_BUCKET = "";
+export const DEFAULT_PRIVATE_BUCKET = "";
 
 function readPackageVersion() {
   try {
@@ -79,11 +82,19 @@ function resolveProvider(command) {
   const configPath = path.resolve(options.config || DEFAULT_CONFIG_PATH);
   loadEnvFile(options.envFile);
   const config = readConfig(configPath);
+  const projectId = process.env.GCP_PROJECT_ID || config.projectId || options.project || DEFAULT_PROJECT_ID;
+  const publicBucket = process.env.GCS_PUBLIC_BUCKET || config.publicBucket || options.publicBucket || DEFAULT_PUBLIC_BUCKET;
+  if (!projectId || !publicBucket) {
+    throw new Error(
+      `publish-file is not configured. Set projectId and publicBucket in ${configPath}, ` +
+        "or export GCP_PROJECT_ID and GCS_PUBLIC_BUCKET.",
+    );
+  }
   return {
     configPath,
-    projectId: process.env.GCP_PROJECT_ID || config.projectId || DEFAULT_PROJECT_ID,
-    publicBucket: process.env.GCS_PUBLIC_BUCKET || config.publicBucket || DEFAULT_PUBLIC_BUCKET,
-    privateBucket: process.env.GCS_PRIVATE_BUCKET || config.privateBucket || DEFAULT_PRIVATE_BUCKET,
+    projectId,
+    publicBucket,
+    privateBucket: process.env.GCS_PRIVATE_BUCKET || config.privateBucket || options.privateBucket || DEFAULT_PRIVATE_BUCKET,
     source:
       process.env.GCP_PROJECT_ID || process.env.GCS_PUBLIC_BUCKET || process.env.GCS_PRIVATE_BUCKET
         ? options.envFile
@@ -261,9 +272,9 @@ async function main(argv = process.argv) {
   program
     .command("init")
     .description("Store Google Cloud project and bucket names in local config")
-    .option("--project <id>", "Google Cloud project ID", DEFAULT_PROJECT_ID)
-    .option("--public-bucket <name>", "Public object bucket", DEFAULT_PUBLIC_BUCKET)
-    .option("--private-bucket <name>", "Private object bucket", DEFAULT_PRIVATE_BUCKET)
+    .requiredOption("--project <id>", "Google Cloud project ID")
+    .requiredOption("--public-bucket <name>", "Public object bucket")
+    .option("--private-bucket <name>", "Private object bucket")
     .action(async function (options) {
       const globalOptions = getGlobalOptions(this);
       const configPath = path.resolve(globalOptions.config || DEFAULT_CONFIG_PATH);
