@@ -43,17 +43,24 @@ Instrumental is necessary and **not sufficient**. All three must hold:
 1. **No intelligible lyrics** during language work — reading, writing, coding,
    prompting. Lyrics compete for the same verbal working-memory channel. A
    language the user does not speak is a partial exemption.
-2. **Low dynamics.** No large builds, brass swells, or percussion drops.
-   Dramatic scoring is engineered to seize attention; that is its function in
-   the medium it came from. Excluding it removes much of what makes a track
-   good as *foreground* listening — which is the point.
+2. **Low dynamics — across the whole track, not the opening.** No large
+   builds, brass swells, or percussion drops. Dramatic scoring is engineered
+   to seize attention; that is its function in the medium it came from.
+   Excluding it removes much of what makes a track good as *foreground*
+   listening — which is the point. The specific trap is the **calm intro that
+   swells at the midpoint**, which is how film and anime cues are written by
+   default: it auditions well for ninety seconds and then breaks the session.
+   Screen the middle of a track before adding it.
 3. **Not scene-indexed.** Music tied to vivid remembered scenes — a film cue,
    a battle theme, anything with a strong narrative attachment — does not fade
    into texture. It launches the scene. This criterion disqualifies material
    that passes the first two, and it is the one that gets missed.
 
 Familiarity helps: known music becomes texture, novel music recruits
-attention. Two failure modes to watch — a beloved track can be *too*
+attention. Criterion 2 outranks criterion 3 in practice: a quiet cue from
+beloved source material can sit in a pool fine, while a swelling one from the
+same composer breaks it. When a track is rejected, ask *which* criterion it
+broke — the answer sharpens the next batch far more than the rejection does. Two failure modes to watch — a beloved track can be *too*
 engaging, and a queue that ends hands the session to autoplay.
 
 ## The Audition Funnel
