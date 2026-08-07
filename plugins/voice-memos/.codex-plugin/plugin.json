@@ -1,0 +1,38 @@
+{
+  "name": "voice-memos",
+  "version": "0.1.0",
+  "description": "Read the macOS Voice Memos store from Codex.",
+  "author": {
+    "name": "PedroAVJ",
+    "url": "https://github.com/PedroAVJ"
+  },
+  "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/voice-memos",
+  "repository": "https://github.com/PedroAVJ/loadout",
+  "license": "MIT",
+  "keywords": [
+    "voice-memos",
+    "macos",
+    "audio",
+    "transcription",
+    "core-data"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Voice Memos",
+    "shortDescription": "Read the macOS Voice Memos store",
+    "longDescription": "Enumerate Apple Voice Memos recordings with correct metadata by reading the Core Data store directly, resolve recordings to audio paths, and extract Apple's on-device transcripts when present.",
+    "developerName": "PedroAVJ",
+    "category": "Productivity",
+    "capabilities": [
+      "Read"
+    ],
+    "websiteURL": "https://github.com/PedroAVJ/loadout/tree/main/plugins/voice-memos",
+    "defaultPrompt": [
+      "List my recent voice memos",
+      "What voice memos do I have from this week",
+      "Get the audio path for my latest voice memo"
+    ],
+    "brandColor": "#111111",
+    "screenshots": []
+  }
+}

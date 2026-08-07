@@ -110,6 +110,13 @@
       "category": "productivity",
       "source": "./plugins/youtube-music",
       "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/youtube-music"
+    },
+    {
+      "name": "voice-memos",
+      "description": "Read the macOS Voice Memos store — recordings, metadata, and Apple's embedded transcripts.",
+      "category": "productivity",
+      "source": "./plugins/voice-memos",
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/voice-memos"
     }
   ]
 }
