@@ -24,8 +24,8 @@ repo.
 Install into local agents with the skills CLI:
 
 ```bash
-npx skills add PedroAVJ/swe-stack --list
-npx skills add PedroAVJ/swe-stack --skill <name> -a claude-code -a codex -g -y
+npx skills add PedroAVJ/loadout --list
+npx skills add PedroAVJ/loadout --skill <name> -a claude-code -a codex -g -y
 ```
 
 Always install by explicit `--skill` name. Do not use `-s '*'` / `--all` on
@@ -34,7 +34,7 @@ plugin-internal skills under `plugins/*/skills/`, which are delivered via the
 plugin marketplaces and must not be double-installed as standalone skills.
 
 Workflow: edit skills here (upstream) first, push, then `npx skills update
--g` locally — see `.agents/skills/swe-stack-release` for the full release
+-g` locally — see `.agents/skills/loadout-release` for the full release
 procedure. The skills CLI keeps the canonical copy in `~/.agents/skills/`
 and symlinks `~/.claude/skills/` automatically (Claude Code does not read
 the agents directory itself). Local skill directories are CLI-managed

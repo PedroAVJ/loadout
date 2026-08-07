@@ -1,4 +1,4 @@
-# SWE Stack Google Drive CLI Plugin
+# Loadout Google Drive CLI Plugin
 
 Use Google Drive through the authenticated Google Workspace CLI, `gws`.
 

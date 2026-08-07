@@ -1,17 +1,17 @@
 {
-  "name": "@swe-stack/whatsapp",
+  "name": "@loadout/whatsapp",
   "version": "0.3.7",
   "private": false,
   "description": "Agent-first WhatsApp plugin and CLI for Codex and Claude Code.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PedroAVJ/swe-stack.git",
+    "url": "git+https://github.com/PedroAVJ/loadout.git",
     "directory": "plugins/whatsapp"
   },
-  "homepage": "https://github.com/PedroAVJ/swe-stack/tree/main/plugins/whatsapp#readme",
+  "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/whatsapp#readme",
   "bugs": {
-    "url": "https://github.com/PedroAVJ/swe-stack/issues"
+    "url": "https://github.com/PedroAVJ/loadout/issues"
   },
   "bin": {
     "whatsapp": "./bin/whatsapp"

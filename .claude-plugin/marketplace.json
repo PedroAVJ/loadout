@@ -1,6 +1,6 @@
 {
-  "name": "swe-stack",
-  "description": "SWE Stack plugins for local-first agent workflows.",
+  "name": "loadout",
+  "description": "Loadout plugins for local-first agent workflows.",
   "owner": {
     "name": "PedroAVJ",
     "url": "https://github.com/PedroAVJ"
@@ -11,63 +11,63 @@
       "description": "Work with WhatsApp chats, message context, media, and reviewable drafts.",
       "category": "productivity",
       "source": "./plugins/whatsapp",
-      "homepage": "https://github.com/PedroAVJ/swe-stack/tree/main/plugins/whatsapp"
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/whatsapp"
     },
     {
       "name": "oracle",
       "description": "Ask Claude Fable 5 through Claude Code for a fail-closed, identity-verified second opinion.",
       "category": "productivity",
       "source": "./plugins/oracle",
-      "homepage": "https://github.com/PedroAVJ/swe-stack/tree/main/plugins/oracle"
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/oracle"
     },
     {
       "name": "gmail-cli",
       "description": "Use Gmail raw-message, MIME, and attachment workflows through the authenticated gws CLI.",
       "category": "productivity",
       "source": "./plugins/gmail-cli",
-      "homepage": "https://github.com/PedroAVJ/swe-stack/tree/main/plugins/gmail-cli"
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/gmail-cli"
     },
     {
       "name": "google-drive-cli",
       "description": "Use Google Drive search, download, export, upload, and sharing workflows through gws.",
       "category": "productivity",
       "source": "./plugins/google-drive-cli",
-      "homepage": "https://github.com/PedroAVJ/swe-stack/tree/main/plugins/google-drive-cli"
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/google-drive-cli"
     },
     {
       "name": "google-tasks",
       "description": "Use Google Tasks reads and guarded mutations through gws.",
       "category": "productivity",
       "source": "./plugins/google-tasks",
-      "homepage": "https://github.com/PedroAVJ/swe-stack/tree/main/plugins/google-tasks"
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/google-tasks"
     },
     {
       "name": "google-contacts",
       "description": "Use Google Contacts identity, phone, organization, and WhatsApp-enrichment lookups through gws.",
       "category": "productivity",
       "source": "./plugins/google-contacts",
-      "homepage": "https://github.com/PedroAVJ/swe-stack/tree/main/plugins/google-contacts"
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/google-contacts"
     },
     {
       "name": "elevenlabs",
       "description": "Use ElevenLabs audio and speech tools from Claude Code.",
       "category": "productivity",
       "source": "./plugins/elevenlabs",
-      "homepage": "https://github.com/PedroAVJ/swe-stack/tree/main/plugins/elevenlabs"
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/elevenlabs"
     },
     {
       "name": "android-phone",
       "description": "Inspect, test, debug, and control Android phones through ADB.",
       "category": "productivity",
       "source": "./plugins/android-phone",
-      "homepage": "https://github.com/PedroAVJ/swe-stack/tree/main/plugins/android-phone"
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/android-phone"
     },
     {
       "name": "symphony",
       "description": "Symphony workflow protocols for Pedro's explicit lifecycle loops: evidence intake, requirements elicitation, implementation dispatch, Linear hygiene.",
       "category": "productivity",
       "source": "./plugins/symphony",
-      "homepage": "https://github.com/PedroAVJ/swe-stack/tree/main/plugins/symphony"
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/symphony"
     }
   ]
 }

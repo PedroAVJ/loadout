@@ -1,6 +1,6 @@
 # Plugins
 
-SWE Stack plugins package local bridges, CLIs, and agent instructions behind a
+Loadout plugins package local bridges, CLIs, and agent instructions behind a
 Codex- and Claude Code-friendly shape.
 
 Available now:

@@ -1,16 +1,16 @@
 {
-  "name": "swe-stack",
+  "name": "loadout",
   "version": "0.1.0",
   "private": false,
-  "description": "Agentic SDK for prosumers.",
+  "description": "The armory your agents build loadouts from.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PedroAVJ/swe-stack.git"
+    "url": "git+https://github.com/PedroAVJ/loadout.git"
   },
-  "homepage": "https://github.com/PedroAVJ/swe-stack#readme",
+  "homepage": "https://github.com/PedroAVJ/loadout#readme",
   "bugs": {
-    "url": "https://github.com/PedroAVJ/swe-stack/issues"
+    "url": "https://github.com/PedroAVJ/loadout/issues"
   },
   "workspaces": [
     "plugins/*"

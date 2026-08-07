@@ -87,7 +87,7 @@ Run inline only for tiny changes or when subagents are unavailable.
 Bundled helper:
 
 ```bash
-"$(find "${CODEX_HOME:-$HOME/.codex}/plugins/cache/swe-stack/symphony" \
+"$(find "${CODEX_HOME:-$HOME/.codex}/plugins/cache/loadout/symphony" \
   -path '*/skills/codex-review/scripts/codex-review' \
   -print | sort -V | tail -1)" --help
 ```

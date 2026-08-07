@@ -1,7 +1,7 @@
 {
-  "name": "swe-stack",
+  "name": "loadout",
   "interface": {
-    "displayName": "SWE Stack"
+    "displayName": "Loadout"
   },
   "plugins": [
     {

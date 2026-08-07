@@ -960,7 +960,7 @@ def elevenlabs_transcribe_script() -> Path:
     if len(SOURCE_ROOT.parents) > 1:
         candidates.append(SOURCE_ROOT.parents[1] / "elevenlabs" / "0.1.0" / "scripts" / "transcribe_elevenlabs.py")
     candidates.append(
-        Path("~/.codex/plugins/cache/swe-stack/elevenlabs/0.1.0/scripts/transcribe_elevenlabs.py").expanduser()
+        Path("~/.codex/plugins/cache/loadout/elevenlabs/0.1.0/scripts/transcribe_elevenlabs.py").expanduser()
     )
     for candidate in candidates:
         if candidate.exists():

@@ -1,4 +1,4 @@
-# SWE Stack Google Tasks CLI Plugin
+# Loadout Google Tasks CLI Plugin
 
 Use Google Tasks through the authenticated Google Workspace CLI, `gws`.
 

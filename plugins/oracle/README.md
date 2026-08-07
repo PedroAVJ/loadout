@@ -1,4 +1,4 @@
-# SWE Stack Oracle Plugin
+# Loadout Oracle Plugin
 
 A Codex-hosted Claude Fable 5 second-opinion workflow with fail-closed model
 identity verification.
@@ -24,25 +24,25 @@ related marks belong to their respective owners.
 
 ## Install With Codex
 
-Install SWE Stack as a Codex marketplace, then install `oracle` from the
+Install Loadout as a Codex marketplace, then install `oracle` from the
 Plugins screen.
 
 ```bash
-codex plugin marketplace add PedroAVJ/swe-stack --ref main --sparse .agents/plugins --sparse plugins/oracle
+codex plugin marketplace add PedroAVJ/loadout --ref main --sparse .agents/plugins --sparse plugins/oracle
 codex plugin marketplace upgrade
 ```
 
 Equivalent marketplace values in the Codex app:
 
 ```text
-Source: PedroAVJ/swe-stack
+Source: PedroAVJ/loadout
 Git ref: main
 Sparse paths:
 .agents/plugins
 plugins/oracle
 ```
 
-If SWE Stack is already installed, add `plugins/oracle` to its sparse paths or
+If Loadout is already installed, add `plugins/oracle` to its sparse paths or
 leave sparse paths blank, then run `codex plugin marketplace upgrade`.
 
 ## Oracle Flow

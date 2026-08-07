@@ -3,7 +3,7 @@ name: oracle
 description: Ask Claude Fable 5 through Claude Code for a focused second opinion, with fail-closed model-identity verification and no silent fallback.
 metadata:
   author: Pedro
-  origin: swe-stack-plugin
+  origin: loadout-plugin
   source: hand-written
   provenance: unofficial-not-openai-curated
 ---

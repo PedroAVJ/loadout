@@ -1,18 +1,18 @@
 ---
-name: swe-stack-release
-description: Release and upgrade SWE Stack plugins and standalone skills across both Codex and Claude Code. Use when changing a plugin or skill in PedroAVJ/swe-stack, bumping plugin versions, publishing to the marketplace, syncing local skill installs, or verifying that Codex and Claude both see the same version.
+name: loadout-release
+description: Release and upgrade Loadout plugins and standalone skills across both Codex and Claude Code. Use when changing a plugin or skill in PedroAVJ/loadout, bumping plugin versions, publishing to the marketplace, syncing local skill installs, or verifying that Codex and Claude both see the same version.
 ---
 
-# SWE Stack Release
+# Loadout Release
 
-Use this skill when a SWE Stack plugin or standalone skill changes and needs
+Use this skill when a Loadout plugin or standalone skill changes and needs
 to be available in both Codex and Claude Code. The repo is the source of
 truth for both content types: edit upstream first, push, then upgrade local
 installs.
 
 ## Model
 
-SWE Stack hosts two content types:
+Loadout hosts two content types:
 
 - **Plugins**: one shared source directory per plugin with client-specific
   manifests.
@@ -34,13 +34,13 @@ plugins should share skills, scripts, CLIs, assets, docs, and tests.
 Start from the marketplace checkout:
 
 ```bash
-cd ~/.codex/.tmp/marketplaces/swe-stack
+cd ~/.codex/.tmp/marketplaces/loadout
 git status --short --branch
 git fetch origin main
 ```
 
 If another checkout is in use, verify its remote is
-`https://github.com/PedroAVJ/swe-stack.git`.
+`https://github.com/PedroAVJ/loadout.git`.
 
 Leave unrelated untracked installer files alone, such as
 `.codex-marketplace-install.json`.
@@ -101,8 +101,8 @@ git ls-remote origin refs/heads/main
 Codex has its own marketplace checkout and plugin cache under:
 
 ```text
-~/.codex/.tmp/marketplaces/swe-stack
-~/.codex/plugins/cache/swe-stack/<plugin>/<version>
+~/.codex/.tmp/marketplaces/loadout
+~/.codex/plugins/cache/loadout/<plugin>/<version>
 ```
 
 Upgrade:
@@ -122,7 +122,7 @@ codex -c 'service_tier="fast"' plugin marketplace upgrade
 Verify the installed cache:
 
 ```bash
-find ~/.codex/plugins/cache/swe-stack/<plugin> -maxdepth 2 -name package.json -print -exec cat {} \;
+find ~/.codex/plugins/cache/loadout/<plugin> -maxdepth 2 -name package.json -print -exec cat {} \;
 ```
 
 For CLI plugins, verify the new command surface through the installed command
@@ -133,16 +133,16 @@ or cache path.
 Claude Code has a separate marketplace checkout, install manifest, and cache:
 
 ```text
-~/.claude/plugins/marketplaces/swe-stack
+~/.claude/plugins/marketplaces/loadout
 ~/.claude/plugins/installed_plugins.json
-~/.claude/plugins/cache/swe-stack/<plugin>/<version>
+~/.claude/plugins/cache/loadout/<plugin>/<version>
 ```
 
 Update the marketplace, then update the installed plugin:
 
 ```bash
-claude plugins marketplace update swe-stack
-claude plugins update <plugin>@swe-stack
+claude plugins marketplace update loadout
+claude plugins update <plugin>@loadout
 ```
 
 Verify:
@@ -150,7 +150,7 @@ Verify:
 ```bash
 claude plugins list
 cat ~/.claude/plugins/installed_plugins.json
-cat ~/.claude/plugins/cache/swe-stack/<plugin>/<version>/.claude-plugin/plugin.json
+cat ~/.claude/plugins/cache/loadout/<plugin>/<version>/.claude-plugin/plugin.json
 ```
 
 Claude reports "restart required to apply changes"; mention this if any Claude
@@ -159,8 +159,8 @@ session may already be running.
 If Claude's marketplace checkout reports stale `origin/main`, refresh it:
 
 ```bash
-git -C ~/.claude/plugins/marketplaces/swe-stack fetch origin main
-git -C ~/.claude/plugins/marketplaces/swe-stack status --short --branch
+git -C ~/.claude/plugins/marketplaces/loadout fetch origin main
+git -C ~/.claude/plugins/marketplaces/loadout status --short --branch
 ```
 
 ## Standalone Skills Release
@@ -184,7 +184,7 @@ Release flow:
 
 ```bash
 npx skills update -g                 # refresh all tracked skills from their sources
-npx skills add PedroAVJ/swe-stack --skill <name> -a codex -a claude-code -g -y   # first install of a new skill
+npx skills add PedroAVJ/loadout --skill <name> -a codex -a claude-code -g -y   # first install of a new skill
 ```
 
 Always install by explicit `--skill` name. Never use `-s '*'` / `--all`

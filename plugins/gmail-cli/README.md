@@ -1,4 +1,4 @@
-# SWE Stack Gmail CLI Plugin
+# Loadout Gmail CLI Plugin
 
 Use Gmail through the authenticated Google Workspace CLI, `gws`.
 

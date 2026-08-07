@@ -1,4 +1,4 @@
-# SWE Stack WhatsApp Plugin
+# Loadout WhatsApp Plugin
 
 An agent-first WhatsApp plugin and CLI for Codex and Claude Code.
 
@@ -31,8 +31,8 @@ This project is unofficial and is not affiliated with WhatsApp or Meta.
 ## Install
 
 ```bash
-git clone https://github.com/PedroAVJ/swe-stack.git
-cd swe-stack/plugins/whatsapp
+git clone https://github.com/PedroAVJ/loadout.git
+cd loadout/plugins/whatsapp
 pnpm install
 pnpm test
 ```
@@ -79,17 +79,17 @@ WHATSAPP_USE_PHONE_PAIRING=1 WHATSAPP_MCP_PAIR_PHONE=15551234567 pnpm setup
 
 ## Use With Codex
 
-Install SWE Stack as a Codex marketplace, then install the `whatsapp` plugin from the Plugins screen.
+Install Loadout as a Codex marketplace, then install the `whatsapp` plugin from the Plugins screen.
 
 ```bash
-codex plugin marketplace add PedroAVJ/swe-stack --ref main --sparse .agents/plugins --sparse plugins/whatsapp
+codex plugin marketplace add PedroAVJ/loadout --ref main --sparse .agents/plugins --sparse plugins/whatsapp
 codex plugin marketplace upgrade
 ```
 
 In the Codex app, the equivalent Add marketplace values are:
 
 ```text
-Source: PedroAVJ/swe-stack
+Source: PedroAVJ/loadout
 Git ref: main
 Sparse paths:
 .agents/plugins

@@ -1,10 +1,12 @@
-# SWE Stack
+# Loadout
 
-Agentic SDK for prosumers.
+The armory your agents build loadouts from.
 
-SWE Stack is a collection of local-first tools, plugins, CLIs, skills, and agent workflows for people who want software-engineering agents to operate real personal and business systems without handing everything to a hosted SaaS.
+Loadout is a collection of local-first tools, plugins, CLIs, skills, and agent workflows for people who want software-engineering agents to operate real personal and business systems without handing everything to a hosted SaaS.
 
-The stack is intentionally practical:
+A loadout is what an agent equips for a job: gear that reaches real systems, know-how that carries procedure without touching anything, and other models it can hand work to. This repo is the shared stock. Each client installs the subset it needs through sparse marketplace paths, so no agent carries the whole armory.
+
+It is intentionally practical:
 
 - Agent-facing CLIs with stable JSON output.
 - Local SQLite-backed state where durability matters.
@@ -45,7 +47,7 @@ More modules will land here as the custom stack gets cleaned up for public use.
 In the Codex app, open Plugins -> Manage -> Add marketplace:
 
 ```text
-Source: PedroAVJ/swe-stack
+Source: PedroAVJ/loadout
 Git ref: main
 Sparse paths:
 .agents/plugins
@@ -64,7 +66,7 @@ plugins/symphony
 Or from the CLI:
 
 ```bash
-codex plugin marketplace add PedroAVJ/swe-stack --ref main --sparse .agents/plugins --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/elevenlabs --sparse plugins/claude --sparse plugins/android-phone --sparse plugins/symphony
+codex plugin marketplace add PedroAVJ/loadout --ref main --sparse .agents/plugins --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/elevenlabs --sparse plugins/claude --sparse plugins/android-phone --sparse plugins/symphony
 codex plugin marketplace upgrade
 ```
 
@@ -73,8 +75,8 @@ Leave sparse paths blank if you want Codex to fetch the whole marketplace repo. 
 ### Install In Claude Code
 
 ```bash
-claude plugin marketplace add PedroAVJ/swe-stack --sparse .claude-plugin --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/elevenlabs --sparse plugins/android-phone --sparse plugins/symphony
-claude plugin install whatsapp@swe-stack
+claude plugin marketplace add PedroAVJ/loadout --sparse .claude-plugin --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/elevenlabs --sparse plugins/android-phone --sparse plugins/symphony
+claude plugin install whatsapp@loadout
 ```
 
 Install the other Claude-compatible plugins from the same marketplace as needed.
@@ -82,8 +84,8 @@ Install the other Claude-compatible plugins from the same marketplace as needed.
 ### Develop Locally
 
 ```bash
-git clone https://github.com/PedroAVJ/swe-stack.git
-cd swe-stack
+git clone https://github.com/PedroAVJ/loadout.git
+cd loadout
 pnpm test
 ```
 
@@ -95,7 +97,7 @@ cd plugins/whatsapp
 ```
 
 For plugin releases, use
-[`swe-stack-plugin-release`](./.agents/skills/swe-stack-plugin-release/SKILL.md).
+[`loadout-release`](./.agents/skills/loadout-release/SKILL.md).
 It captures the Codex and Claude Code version bump, marketplace upgrade, and
 cache verification workflow.
 

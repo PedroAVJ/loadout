@@ -1,4 +1,4 @@
-# SWE Stack ElevenLabs Plugin
+# Loadout ElevenLabs Plugin
 
 Use ElevenLabs audio and speech tooling from Codex or Claude Code.
 

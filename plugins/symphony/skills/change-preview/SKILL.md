@@ -32,7 +32,7 @@ This is a thin orchestration skill for Symphony/the runner. Claude does the crea
 Call the helper with a target PR/change plus an output path. The helper calls Claude with a short prompt that explicitly asks it to use `frontend-design`. Do not give Claude a prescribed section outline or visual direction.
 
 ```bash
-python3 "$(find "${CODEX_HOME:-$HOME/.codex}/plugins/cache/swe-stack/symphony" \
+python3 "$(find "${CODEX_HOME:-$HOME/.codex}/plugins/cache/loadout/symphony" \
   -path '*/skills/change-preview/scripts/generate_preview.py' \
   -print | sort -V | tail -1)" \
   --workspace . \

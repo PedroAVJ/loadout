@@ -1,4 +1,4 @@
-# SWE Stack Google Contacts CLI Plugin
+# Loadout Google Contacts CLI Plugin
 
 Use Google Contacts through the authenticated Google Workspace CLI, `gws`.
 
