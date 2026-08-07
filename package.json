@@ -16,8 +16,10 @@
     "plugins/*"
   ],
   "scripts": {
-    "test": "pnpm --dir plugins/whatsapp test",
+    "test": "node --test tests/*.test.mjs && pnpm --dir plugins/google-cloud test && pnpm --dir plugins/whatsapp test",
     "test:whatsapp": "pnpm --dir plugins/whatsapp test",
-    "whatsapp": "pnpm --dir plugins/whatsapp cli --"
+    "whatsapp": "pnpm --dir plugins/whatsapp cli --",
+    "test:structure": "node --test tests/*.test.mjs",
+    "test:google-cloud": "pnpm --dir plugins/google-cloud test"
   }
 }

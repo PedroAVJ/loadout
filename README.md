@@ -20,6 +20,7 @@ It is intentionally practical:
 | Module | Status | Description |
 | --- | --- | --- |
 | [`plugins/loadout`](./plugins/loadout) | Open | The recursive one: find and vet skills, install MCP servers, and release the plugins in this repo to both clients. |
+| [`plugins/google-cloud`](./plugins/google-cloud) | Open | Google Cloud through the `gcloud` CLI: project inventory, the Cloud Storage substrate and its write boundary, and artifact publishing to durable URLs. |
 | [`plugins/oracle`](./plugins/oracle) | Open | Codex-hosted Claude Fable 5 second opinion through Claude Code with fail-closed model verification. |
 | [`plugins/whatsapp`](./plugins/whatsapp) | Open | WhatsApp bridge, SQLite-backed reads, media/context tools, reviewable drafts, and guarded sends for Codex and Claude Code. |
 | [`plugins/gmail-cli`](./plugins/gmail-cli) | Open | Gmail raw-message, MIME, and attachment workflows through the authenticated `gws` CLI. |
@@ -35,8 +36,30 @@ It is intentionally practical:
 
 More modules will land here as the custom stack gets cleaned up for public use.
 
+## Plugins Only
+
+This repo ships **plugins, and only plugins**. There are no standalone skills
+and no standalone MCP servers published here.
+
+A plugin may contain skills and MCP config internally — that is what a plugin
+is for. The rule is about the unit of distribution, not the contents. A
+plugin is versioned, released, and upgraded as one thing through each
+client's marketplace. A standalone skill installs through a separate CLI with
+a separate lockfile, and drifts from the repo that owns it; a standalone MCP
+server is a curated subset of an interface the agent could usually call
+directly.
+
+So when something new is worth keeping, it goes inside the plugin that owns
+it — and if no plugin owns it yet, that is the signal to create one.
+
+`pnpm test:structure` enforces this. It fails on a top-level `skills/`
+directory, on repo-scoped agent-skill directories, on a root MCP manifest, on
+manifest/marketplace drift, and on any `SKILL.md` outside
+`plugins/<plugin>/skills/<skill>/`.
+
 ## Principles
 
+0. Plugins are the only unit of distribution.
 1. Local-first by default.
 2. Agent-readable interfaces before UI gloss.
 3. Human approval before irreversible side effects.
@@ -55,6 +78,7 @@ Git ref: main
 Sparse paths:
 .agents/plugins
 plugins/loadout
+plugins/google-cloud
 plugins/macbook
 plugins/codex-app
 plugins/whatsapp
@@ -72,7 +96,7 @@ plugins/symphony
 Or from the CLI:
 
 ```bash
-codex plugin marketplace add PedroAVJ/loadout --ref main --sparse .agents/plugins --sparse plugins/loadout --sparse plugins/macbook --sparse plugins/codex-app --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/elevenlabs --sparse plugins/claude --sparse plugins/android-phone --sparse plugins/symphony
+codex plugin marketplace add PedroAVJ/loadout --ref main --sparse .agents/plugins --sparse plugins/loadout --sparse plugins/google-cloud --sparse plugins/macbook --sparse plugins/codex-app --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/elevenlabs --sparse plugins/claude --sparse plugins/android-phone --sparse plugins/symphony
 codex plugin marketplace upgrade
 ```
 
@@ -81,7 +105,7 @@ Leave sparse paths blank if you want Codex to fetch the whole marketplace repo. 
 ### Install In Claude Code
 
 ```bash
-claude plugin marketplace add PedroAVJ/loadout --sparse .claude-plugin --sparse plugins/loadout --sparse plugins/macbook --sparse plugins/codex-app --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/elevenlabs --sparse plugins/android-phone --sparse plugins/symphony
+claude plugin marketplace add PedroAVJ/loadout --sparse .claude-plugin --sparse plugins/loadout --sparse plugins/google-cloud --sparse plugins/macbook --sparse plugins/codex-app --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/elevenlabs --sparse plugins/android-phone --sparse plugins/symphony
 claude plugin install loadout@loadout
 ```
 

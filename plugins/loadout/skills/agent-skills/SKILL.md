@@ -22,16 +22,31 @@ authoring time, not install time.
 | **MCP server** | Tools the model can call. | `add-mcp` CLI | each agent's own config |
 | **Plugin** | A bundle: skills + scripts + CLIs + MCP config + assets, versioned and released together. | each agent's plugin marketplace | per-agent plugin cache |
 
-Decision rule:
+**For anything Pedro authors, the answer is always a plugin.** Loadout ships
+plugins and only plugins — no standalone skills, no standalone MCP servers.
+A plugin may contain skills and MCP config internally; the rule governs the
+unit of distribution. When new content has no plugin that owns it, that is
+the signal to create one, not to publish it loose. `pnpm test:structure`
+enforces this in the repo.
 
-- Ships **nothing but instructions**, and every dependency it names is
-  already installed → **standalone skill**.
-- Ships **executable code** it owns — a CLI, a script, an MCP server, a
-  binary shim → **plugin**. A skill that says "use the installed `foo` CLI"
-  without owning `foo` is a plugin waiting to be written; the install is
-  incomplete without it.
-- Needs to be **versioned and upgraded as a unit**, or bundles several
-  related skills → **plugin**.
+The reasoning, which is worth keeping because it generalizes:
+
+- A **plugin** is versioned, released, and upgraded as one thing through each
+  client's marketplace. Its skills, scripts, and CLIs move together and
+  cannot drift apart.
+- A **standalone skill** installs through a separate CLI with a separate
+  lockfile pointing at a path in some repo. It drifts, its `remove` is
+  unreliable, and it carries no code — so a skill that says "use the
+  installed `foo` CLI" without owning `foo` ships an incomplete install.
+- A **standalone MCP server** is a curated subset of tools over an interface
+  the agent can usually call directly. When a CLI exists, MCP is strictly
+  less capability at the cost of extra context. It earns its place only when
+  no callable interface exists — access-gated data, or an opaque running
+  process.
+
+The rest of this skill is about *consuming* third-party skills, which is
+still worth doing — it just means installing from their source, never
+vendoring them here.
 
 See `loadout-release` for how plugins are built and published, and
 `mcp-servers` for the MCP side.
@@ -98,8 +113,10 @@ Search order that avoids duplicate work:
 1. **Already installed?** `npx skills list -g`. The most common outcome of
    "find me a skill for X" is that X is installed and simply did not trigger,
    which is a description problem, not a missing-skill problem.
-2. **In loadout?** `npx skills add PedroAVJ/loadout --list`, plus the
-   plugin skills under `plugins/*/skills/`.
+2. **In loadout?** Check the installed plugins — `claude plugin list`,
+   `codex plugin list` — and their skills under `plugins/*/skills/`.
+   Loadout's own content is never a standalone skill, so `npx skills` will
+   not find it.
 3. **The wider ecosystem** — `npx skills find`, and the skills.sh leaderboard
    for a popularity read.
 

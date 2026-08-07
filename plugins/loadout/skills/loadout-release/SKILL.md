@@ -1,29 +1,26 @@
 ---
 name: loadout-release
-description: Release and upgrade Loadout plugins and standalone skills across both Codex and Claude Code. Use when changing a plugin or skill in PedroAVJ/loadout, bumping plugin versions, publishing to the marketplace, syncing local skill installs, or verifying that Codex and Claude both see the same version.
+description: Release and upgrade Loadout plugins across both Codex and Claude Code. Use when changing a plugin in PedroAVJ/loadout, adding a new one, bumping versions, publishing to the marketplaces, or verifying that Codex and Claude both see the same version.
 ---
 
 # Loadout Release
 
-Use this skill when a Loadout plugin or standalone skill changes and needs
-to be available in both Codex and Claude Code. The repo is the source of
-truth for both content types: edit upstream first, push, then upgrade local
-installs.
+Use this skill when a Loadout plugin changes and needs to be available in
+both Codex and Claude Code. The repo is the source of truth: edit upstream
+first, push, then upgrade local installs.
 
 ## Model
 
-Loadout hosts two content types:
+**Loadout ships plugins, and only plugins.** No standalone skills, no
+standalone MCP servers. A plugin may contain skills and MCP config
+internally — the rule governs the unit of distribution, not the contents.
+There is therefore exactly one release path, the one below.
 
-- **Plugins**: one shared source directory per plugin with client-specific
-  manifests.
-  - Shared plugin source: `plugins/<plugin>/`
-  - Codex manifest: `plugins/<plugin>/.codex-plugin/plugin.json`
-  - Claude manifest: `plugins/<plugin>/.claude-plugin/plugin.json`
-  - A plugin is codex-only or Claude-only when only one manifest exists;
-    dual when both do.
-- **Standalone skills**: `skills/<name>/` at the repo root (see
-  `skills/README.md`). No manifests, no marketplace entry. Per-agent
-  targeting happens at install time, not in the repo.
+- Shared plugin source: `plugins/<plugin>/`
+- Codex manifest: `plugins/<plugin>/.codex-plugin/plugin.json`
+- Claude manifest: `plugins/<plugin>/.claude-plugin/plugin.json`
+- A plugin is codex-only or Claude-only when only one manifest exists; dual
+  when both do.
 
 Two marketplace manifests list the plugins and both must stay in sync:
 `.claude-plugin/marketplace.json` and `.agents/plugins/marketplace.json`. A
@@ -34,8 +31,8 @@ Do not fork the implementation just because both clients use the plugin. Add a
 Claude-specific source path only when the runtime behavior truly differs. Most
 plugins should share skills, scripts, CLIs, assets, docs, and tests.
 
-Whether a change belongs in a plugin or a standalone skill is decided by the
-`agent-skills` sibling skill, not here.
+New content always lands inside a plugin. If no existing plugin owns it,
+that is the signal to create one — see "Adding a New Plugin" below.
 
 ## Before Editing
 
@@ -205,23 +202,13 @@ other:
 6. A row in the root `README.md` module table, and the plugin's sparse path
    added to both install snippets there.
 
-Both marketplace manifests are hand-maintained. Diff their plugin name lists
-against `ls plugins/` before committing:
-
-A plugin legitimately appears in only one marketplace when it ships only one
-manifest, so compare each marketplace against the plugins that actually carry
-its manifest rather than against every directory:
+Both marketplace manifests are hand-maintained, and every item above is
+checked by `pnpm test:structure`. Stage the new plugin first — the structure
+test reads `git ls-files`, so an unstaged plugin is invisible to it:
 
 ```bash
-python3 - <<'PY'
-import json, pathlib
-for market, manifest in ((".claude-plugin/marketplace.json", ".claude-plugin"),
-                         (".agents/plugins/marketplace.json", ".codex-plugin")):
-    disk = {p.name for p in pathlib.Path("plugins").iterdir()
-            if (p / manifest / "plugin.json").exists()}
-    listed = {p["name"] for p in json.load(open(market))["plugins"]}
-    print(market, "| missing:", sorted(disk - listed), "| extra:", sorted(listed - disk))
-PY
+git add plugins/<plugin>
+pnpm test:structure
 ```
 
 ## Publishing a New Plugin to the Clients
@@ -279,25 +266,26 @@ Two symptoms of a missed sparse path, both of which look like a repo problem
 and are not: `Source path does not exist` on install, and
 `plugin source path is not a directory` on upgrade.
 
-## Standalone Skills Release
-
-Standalone skills live in `skills/<name>/` at the repo root (see
-`skills/README.md`). They are not plugins: no manifests, no marketplace
-entry.
-
-1. Edit or add the skill under `skills/<name>/` upstream first.
-2. Commit and push to `main` as above.
-3. Sync local installs through the skills CLI:
+## Validate Before Pushing
 
 ```bash
-npx skills update -g                 # refresh all tracked skills from their sources
-npx skills add PedroAVJ/loadout --skill <name> -a codex -a claude-code -g -y   # first install
+pnpm test:structure
 ```
 
-The `agent-skills` sibling skill covers the CLI itself — agent targeting,
-install layout, the lockfile, and the `-s '*'` trap that double-installs
-plugin-internal skills. Read it before running anything beyond the two
-commands above.
+This enforces the plugins-only rule and catches the drift that silently
+breaks a release: a missing client manifest, manifests disagreeing on
+version, a plugin absent from one marketplace, a marketplace listing a
+plugin that is not on disk, or a `SKILL.md` outside
+`plugins/<plugin>/skills/<skill>/`.
+
+The structure test reads `git ls-files`, so a brand-new plugin must be
+staged before it will be checked. Run it after `git add`, not before.
+
+Then run the changed plugin's own tests:
+
+```bash
+pnpm --dir plugins/<plugin> test
+```
 
 ## Rules
 

@@ -89,6 +89,13 @@
       "category": "productivity",
       "source": "./plugins/codex-app",
       "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/codex-app"
+    },
+    {
+      "name": "google-cloud",
+      "description": "Google Cloud through the gcloud CLI: projects, the Cloud Storage substrate, and artifact publishing.",
+      "category": "productivity",
+      "source": "./plugins/google-cloud",
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/google-cloud"
     }
   ]
 }

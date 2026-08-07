@@ -1,0 +1,43 @@
+{
+  "name": "google-cloud",
+  "version": "0.1.0",
+  "description": "Work with Google Cloud through the gcloud CLI: project inventory, the Cloud Storage substrate, and publishing artifacts to durable URLs.",
+  "author": {
+    "name": "PedroAVJ",
+    "url": "https://github.com/PedroAVJ"
+  },
+  "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/google-cloud",
+  "repository": "https://github.com/PedroAVJ/loadout",
+  "license": "MIT",
+  "keywords": [
+    "google-cloud",
+    "gcp",
+    "gcloud",
+    "cloud-storage",
+    "gcs",
+    "publishing"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Google Cloud",
+    "shortDescription": "gcloud, Cloud Storage, and artifact publishing",
+    "longDescription": "Reach Google Cloud through the gcloud CLI rather than a curated connector: which projects exist and what each is for, the three-bucket Cloud Storage substrate and its write boundary, and a bundled CLI for publishing local artifacts to durable public URLs.",
+    "developerName": "PedroAVJ",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#4285F4",
+    "composerIcon": "./assets/google-cloud-icon.svg",
+    "logo": "./assets/google-cloud-icon.svg",
+    "screenshots": [],
+    "defaultPrompt": [
+      "Publish this screenshot and give me the URL",
+      "Which bucket does this artifact belong in?",
+      "Check that last night's Postgres backup landed",
+      "What Google Cloud projects do I have?"
+    ]
+  }
+}
