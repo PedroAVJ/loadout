@@ -1,6 +1,6 @@
 {
   "name": "youtube-music",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Play and curate YouTube Music: throwaway session queues, a validated focus pool, and macOS Background Sounds control.",
   "author": {
     "name": "PedroAVJ",

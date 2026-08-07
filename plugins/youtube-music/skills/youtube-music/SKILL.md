@@ -93,6 +93,12 @@ Pair it with **Repeat all** for a pool that loops indefinitely without ever
 reaching a recommendation. That combination — not a longer pool — is the
 actual fix for "I want only my curated tracks."
 
+Add **Shuffle** unless the user wants a fixed order: a looping pool played in
+playlist order becomes predictable within a session, and predictable order is
+its own low-grade distraction. Note shuffle keeps whatever is *currently*
+playing at the front, so hit Next once afterwards or every session still opens
+on the same track.
+
 Counting the queue in JS: `querySelectorAll('ytmusic-player-queue-item')`
 **over-counts badly** (76 for a 12-track queue) because wrapper renderers nest
 their own items and off-queue content stays in the DOM. Count the children of
