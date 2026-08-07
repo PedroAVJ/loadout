@@ -1,0 +1,43 @@
+{
+  "name": "loadout",
+  "version": "0.1.0",
+  "description": "Manage what this agent can do: find, vet, and install skills; install and audit MCP servers; release Loadout plugins.",
+  "author": {
+    "name": "PedroAVJ",
+    "url": "https://github.com/PedroAVJ"
+  },
+  "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/loadout",
+  "repository": "https://github.com/PedroAVJ/loadout",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "mcp",
+    "plugins",
+    "capability-management",
+    "claude-code",
+    "codex"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Loadout",
+    "shortDescription": "Manage skills, MCP servers, and plugins",
+    "longDescription": "Decide whether a capability should be a skill, an MCP server, or a plugin; find and vet skills before installing them; target the right agents; audit MCP servers across clients; and release Loadout plugins to both Codex and Claude Code.",
+    "developerName": "PedroAVJ",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "brandColor": "#B4713D",
+    "composerIcon": "./assets/loadout-icon.svg",
+    "logo": "./assets/loadout-icon.svg",
+    "screenshots": [],
+    "defaultPrompt": [
+      "Is there a skill for this, or should I write one?",
+      "Install this skill for Codex and Claude Code",
+      "Audit which MCP servers are configured where",
+      "Release the changed Loadout plugin to both clients"
+    ]
+  }
+}

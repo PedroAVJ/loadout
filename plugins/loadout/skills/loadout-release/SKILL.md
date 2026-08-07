@@ -25,9 +25,17 @@ Loadout hosts two content types:
   `skills/README.md`). No manifests, no marketplace entry. Per-agent
   targeting happens at install time, not in the repo.
 
+Two marketplace manifests list the plugins and both must stay in sync:
+`.claude-plugin/marketplace.json` and `.agents/plugins/marketplace.json`. A
+plugin that exists on disk but is missing from a manifest is invisible to
+that client.
+
 Do not fork the implementation just because both clients use the plugin. Add a
 Claude-specific source path only when the runtime behavior truly differs. Most
 plugins should share skills, scripts, CLIs, assets, docs, and tests.
+
+Whether a change belongs in a plugin or a standalone skill is decided by the
+`agent-skills` sibling skill, not here.
 
 ## Before Editing
 
@@ -178,46 +186,60 @@ git -C ~/.claude/plugins/marketplaces/loadout fetch origin main
 git -C ~/.claude/plugins/marketplaces/loadout status --short --branch
 ```
 
+## Adding a New Plugin
+
+A new plugin is not done when its directory exists. Every one of these must
+land in the same change, or the plugin is invisible to one client or the
+other:
+
+1. `plugins/<plugin>/.codex-plugin/plugin.json` — Codex manifest, including
+   the `interface` block (display name, icon, category, default prompts).
+2. `plugins/<plugin>/.claude-plugin/plugin.json` — Claude manifest, when the
+   plugin should work there.
+3. `plugins/<plugin>/README.md`.
+4. An entry in `.claude-plugin/marketplace.json`.
+5. An entry in `.agents/plugins/marketplace.json`.
+6. A row in the root `README.md` module table, and the plugin's sparse path
+   added to both install snippets there.
+
+Both marketplace manifests are hand-maintained. Diff their plugin name lists
+against `ls plugins/` before committing:
+
+A plugin legitimately appears in only one marketplace when it ships only one
+manifest, so compare each marketplace against the plugins that actually carry
+its manifest rather than against every directory:
+
+```bash
+python3 - <<'PY'
+import json, pathlib
+for market, manifest in ((".claude-plugin/marketplace.json", ".claude-plugin"),
+                         (".agents/plugins/marketplace.json", ".codex-plugin")):
+    disk = {p.name for p in pathlib.Path("plugins").iterdir()
+            if (p / manifest / "plugin.json").exists()}
+    listed = {p["name"] for p in json.load(open(market))["plugins"]}
+    print(market, "| missing:", sorted(disk - listed), "| extra:", sorted(listed - disk))
+PY
+```
+
 ## Standalone Skills Release
 
-Pedro-authored standalone skills live in `skills/<name>/` at the repo root
-(see `skills/README.md`). They are not plugins: no manifests, no marketplace
+Standalone skills live in `skills/<name>/` at the repo root (see
+`skills/README.md`). They are not plugins: no manifests, no marketplace
 entry.
-
-Local skill installs are managed by the skills CLI (`npx skills`,
-vercel-labs/skills). Its default layout: one canonical copy in
-`~/.agents/skills/` (read natively by Codex and most agents) plus symlinks
-into `~/.claude/skills/` for Claude Code. The lockfile at
-`~/.agents/.skill-lock.json` records each skill's source repo. Do not place
-or edit files in these directories by hand.
-
-Release flow:
 
 1. Edit or add the skill under `skills/<name>/` upstream first.
 2. Commit and push to `main` as above.
-3. Sync local installs through the CLI:
+3. Sync local installs through the skills CLI:
 
 ```bash
 npx skills update -g                 # refresh all tracked skills from their sources
-npx skills add PedroAVJ/loadout --skill <name> -a codex -a claude-code -g -y   # first install of a new skill
+npx skills add PedroAVJ/loadout --skill <name> -a codex -a claude-code -g -y   # first install
 ```
 
-Always install by explicit `--skill` name. Never use `-s '*'` / `--all`
-against this repo: the CLI discovers plugin-internal SKILL.md folders under
-`plugins/*/skills/` and would double-install them as standalone skills.
-
-## Claude Code Bridge
-
-Claude Code does not read `~/.agents/skills/` (open request
-anthropics/claude-code#31005; verified empirically 2026-06-10 with probe
-skills). The skills CLI bridges this automatically by symlinking each
-installed skill into `~/.claude/skills/`. Manual fallback, only for a skill
-the CLI does not manage — per-skill symlink, never the whole directory
-(Claude writes `.system/` files into its skills dir):
-
-```bash
-ln -sfn ~/.agents/skills/<name> ~/.claude/skills/<name>
-```
+The `agent-skills` sibling skill covers the CLI itself — agent targeting,
+install layout, the lockfile, and the `-s '*'` trap that double-installs
+plugin-internal skills. Read it before running anything beyond the two
+commands above.
 
 ## Rules
 

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Agent Ledger"
-  short_description: "Track agent-owned operational state in local SQLite."
-  default_prompt: "Use Agent Ledger to record or inspect agent-owned notes, obligations, todos, reminders, and mutable personal operating context."

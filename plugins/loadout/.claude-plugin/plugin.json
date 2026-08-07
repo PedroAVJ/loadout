@@ -1,0 +1,21 @@
+{
+  "name": "loadout",
+  "version": "0.1.0",
+  "description": "Manage what this agent can do: find, vet, and install skills; install and audit MCP servers; release Loadout plugins.",
+  "author": {
+    "name": "PedroAVJ",
+    "url": "https://github.com/PedroAVJ"
+  },
+  "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/loadout",
+  "repository": "https://github.com/PedroAVJ/loadout",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "mcp",
+    "plugins",
+    "capability-management",
+    "claude-code",
+    "codex"
+  ],
+  "skills": "./skills/"
+}

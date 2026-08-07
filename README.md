@@ -19,6 +19,7 @@ It is intentionally practical:
 
 | Module | Status | Description |
 | --- | --- | --- |
+| [`plugins/loadout`](./plugins/loadout) | Open | The recursive one: find and vet skills, install MCP servers, and release the plugins in this repo to both clients. |
 | [`plugins/oracle`](./plugins/oracle) | Open | Codex-hosted Claude Fable 5 second opinion through Claude Code with fail-closed model verification. |
 | [`plugins/whatsapp`](./plugins/whatsapp) | Open | WhatsApp bridge, SQLite-backed reads, media/context tools, reviewable drafts, and guarded sends for Codex and Claude Code. |
 | [`plugins/gmail-cli`](./plugins/gmail-cli) | Open | Gmail raw-message, MIME, and attachment workflows through the authenticated `gws` CLI. |
@@ -51,6 +52,7 @@ Source: PedroAVJ/loadout
 Git ref: main
 Sparse paths:
 .agents/plugins
+plugins/loadout
 plugins/whatsapp
 plugins/oracle
 plugins/gmail-cli
@@ -66,7 +68,7 @@ plugins/symphony
 Or from the CLI:
 
 ```bash
-codex plugin marketplace add PedroAVJ/loadout --ref main --sparse .agents/plugins --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/elevenlabs --sparse plugins/claude --sparse plugins/android-phone --sparse plugins/symphony
+codex plugin marketplace add PedroAVJ/loadout --ref main --sparse .agents/plugins --sparse plugins/loadout --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/elevenlabs --sparse plugins/claude --sparse plugins/android-phone --sparse plugins/symphony
 codex plugin marketplace upgrade
 ```
 
@@ -75,8 +77,8 @@ Leave sparse paths blank if you want Codex to fetch the whole marketplace repo. 
 ### Install In Claude Code
 
 ```bash
-claude plugin marketplace add PedroAVJ/loadout --sparse .claude-plugin --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/elevenlabs --sparse plugins/android-phone --sparse plugins/symphony
-claude plugin install whatsapp@loadout
+claude plugin marketplace add PedroAVJ/loadout --sparse .claude-plugin --sparse plugins/loadout --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/elevenlabs --sparse plugins/android-phone --sparse plugins/symphony
+claude plugin install loadout@loadout
 ```
 
 Install the other Claude-compatible plugins from the same marketplace as needed.
@@ -97,9 +99,10 @@ cd plugins/whatsapp
 ```
 
 For plugin releases, use
-[`loadout-release`](./.agents/skills/loadout-release/SKILL.md).
-It captures the Codex and Claude Code version bump, marketplace upgrade, and
-cache verification workflow.
+[`loadout-release`](./plugins/loadout/skills/loadout-release/SKILL.md),
+one of the skills in the [`loadout`](./plugins/loadout) plugin. It captures the
+Codex and Claude Code version bump, marketplace upgrade, and cache
+verification workflow.
 
 ## Status
 

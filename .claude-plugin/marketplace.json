@@ -68,6 +68,13 @@
       "category": "productivity",
       "source": "./plugins/symphony",
       "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/symphony"
+    },
+    {
+      "name": "loadout",
+      "description": "Manage what this agent can do: skills, MCP servers, and plugin releases.",
+      "category": "productivity",
+      "source": "./plugins/loadout",
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/loadout"
     }
   ]
 }
