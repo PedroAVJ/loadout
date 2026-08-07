@@ -55,6 +55,11 @@ settings and running `add-mcp https://mcp.linear.app/mcp -a claude-code`
 point at the identical server, but the first is vendor-brokered and the
 second is local. Registering one does not create the other.
 
+OAuth is not the dividing line. A locally configured server can hold its own
+OAuth grant — `codex mcp login` exists for exactly that. What makes an
+integration brokered is that the *vendor's* infrastructure runs the client,
+not that authentication is involved.
+
 Practical consequence when auditing: a vendor-brokered integration will
 never appear in `add-mcp list`, and that is correct rather than broken.
 Never read an empty `list` as "this agent has no MCP tools" — it means "no
@@ -117,6 +122,43 @@ different name in another agent.
 
 `list` only sees locally configured servers — see "Two Ways to Attach an MCP
 Server" above before concluding an agent is empty.
+
+## Reuse a Claude Desktop Extension (.mcpb)
+
+`.mcpb` bundles — MCP Bundles, formerly Desktop Extensions (`.dxt`) — are
+Claude Desktop's one-click format for local servers. No other agent hosts
+them: Claude Code is not an `.mcpb` host, Codex has no notion of the format
+(`codex mcp` takes servers only), and `add-mcp` cannot read one.
+
+The payload is still an ordinary stdio MCP server, so the recipe transfers
+even though the packaging does not. Extract it with the official CLI:
+
+```bash
+npx -y @anthropic-ai/mcpb info <bundle>.mcpb          # inspect in place
+npx -y @anthropic-ai/mcpb unpack <bundle>.mcpb ./out  # extract
+```
+
+A bundle is a zip, so `unzip` works too. Read `manifest.json` →
+`server.mcp_config`, which holds `command`, `args`, and `env` (with optional
+`platform_overrides` per OS).
+
+Resolve the manifest placeholders by hand. The host app normally does this
+and no other agent will:
+
+- `${__dirname}` → absolute path of the unpacked directory
+- `${HOME}`, `${DESKTOP}`, `${DOCUMENTS}`, `${DOWNLOADS}`
+- `${pathSeparator}` or `${/}`
+- `${user_config.KEY}` → the value the manifest's `user_config` block requests
+
+Then register the resolved command like any other stdio server:
+
+```bash
+add-mcp <command> -g -n <name> --args <arg> --args <arg> --env 'KEY=VALUE'
+```
+
+Confirm the interpreter resolves outside Claude Desktop before reporting
+success — bundles frequently assume the desktop app's bundled Node or Python
+runtime rather than one on `PATH`.
 
 ## Remove a Server
 
