@@ -11,10 +11,10 @@ Do not title the workflow as generic transcription. The product surface is Eleve
 
 ## Scribe Use Case
 
-Use the bundled CLI:
+Use the `elevenlabs` CLI:
 
 ```bash
-python3 scripts/transcribe_elevenlabs.py \
+elevenlabs transcribe \
   meeting.mp4 \
   --language es \
   --diarize \
@@ -22,7 +22,10 @@ python3 scripts/transcribe_elevenlabs.py \
   --out output/elevenlabs/meeting/transcript.txt
 ```
 
-Resolve `scripts/transcribe_elevenlabs.py` relative to the ElevenLabs plugin root. If you are reading this skill from a plugin cache path, the helper is two directories above this skill file at `../../scripts/transcribe_elevenlabs.py`.
+The CLI is this plugin's `bin/elevenlabs` and belongs on PATH. Other plugins
+and repos call transcription through that command; nothing should reach into
+this plugin's install layout, because its version directory and marketplace
+cache path change without notice. `ELEVENLABS_API_KEY` must be set.
 
 ## Decision Rules
 

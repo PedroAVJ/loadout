@@ -946,38 +946,33 @@ def media_message_metadata(message_id: str, chat_jid: str) -> dict[str, Any]:
     return message_summary(message, load_identity_context())
 
 
-def elevenlabs_transcribe_script() -> Path:
-    env_path = os.environ.get("ELEVENLABS_TRANSCRIBE_SCRIPT")
-    candidates = []
-    if env_path:
-        candidates.append(Path(env_path).expanduser())
-    candidates.extend(
-        [
-            SOURCE_ROOT.parent / "elevenlabs" / "scripts" / "transcribe_elevenlabs.py",
-            SOURCE_ROOT.parent / "elevenlabs" / "0.1.0" / "scripts" / "transcribe_elevenlabs.py",
-        ]
-    )
-    if len(SOURCE_ROOT.parents) > 1:
-        candidates.append(SOURCE_ROOT.parents[1] / "elevenlabs" / "0.1.0" / "scripts" / "transcribe_elevenlabs.py")
-    candidates.append(
-        Path("~/.codex/plugins/cache/loadout/elevenlabs/0.1.0/scripts/transcribe_elevenlabs.py").expanduser()
-    )
-    for candidate in candidates:
-        if candidate.exists():
-            return candidate
+def elevenlabs_transcribe_command() -> list[str]:
+    """Resolve the ElevenLabs transcription entry point.
+
+    Transcription belongs to the elevenlabs plugin, which exposes it as the
+    `elevenlabs` CLI on PATH. Never reach into that plugin's install layout:
+    its version directory and marketplace cache path are not ours to know.
+    """
+    override = os.environ.get("ELEVENLABS_TRANSCRIBE_SCRIPT")
+    if override:
+        return ["python3", str(Path(override).expanduser())]
+    cli = shutil.which("elevenlabs")
+    if cli:
+        return [cli, "transcribe"]
     raise CliError(
-        "ElevenLabs transcription helper was not found.",
-        code="missing_elevenlabs_helper",
-        details={"candidates": [str(candidate) for candidate in candidates]},
+        "The elevenlabs CLI was not found on PATH.",
+        code="missing_elevenlabs_cli",
+        details={
+            "install": "Install the elevenlabs plugin from the loadout marketplace and put its bin/elevenlabs on PATH.",
+            "override_env": "ELEVENLABS_TRANSCRIBE_SCRIPT",
+        },
     )
 
 
 def run_elevenlabs_transcribe(audio_path: Path, output_path: Path, args: argparse.Namespace) -> str:
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    script = elevenlabs_transcribe_script()
     cmd = [
-        "python3",
-        str(script),
+        *elevenlabs_transcribe_command(),
         str(audio_path),
         "--model",
         args.model,

@@ -1,6 +1,6 @@
 {
   "name": "@loadout/whatsapp",
-  "version": "0.3.7",
+  "version": "0.4.0",
   "private": false,
   "description": "Agent-first WhatsApp plugin and CLI for Codex and Claude Code.",
   "license": "MIT",
@@ -25,6 +25,6 @@
     "backend": "/bin/zsh ./scripts/run_cli.sh",
     "mcp": "/bin/zsh ./scripts/run_mcp.sh",
     "setup": "/bin/zsh ./scripts/setup.sh",
-    "test": "node --test ./tests/replacement.test.mjs"
+    "test": "node --test ./tests/replacement.test.mjs && python3 -m unittest discover -s tests -p 'test_*.py'"
   }
 }

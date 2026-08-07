@@ -15,7 +15,11 @@ This project is unofficial and is not affiliated with ElevenLabs.
 ## Start
 
 ```bash
-python3 scripts/transcribe_elevenlabs.py meeting.mp4 --language es --diarize --num-speakers 2 --response-format diarized_text --out transcript.txt
+elevenlabs transcribe meeting.mp4 --language es --diarize --response-format diarized_text --out transcript.txt
 ```
+
+`bin/elevenlabs` is the plugin's entry point and belongs on PATH. Other
+plugins and repos call transcription through that command rather than
+reaching into this plugin's install directory.
 
 Use the `elevenlabs` skill for the documented Scribe options and safety rules.

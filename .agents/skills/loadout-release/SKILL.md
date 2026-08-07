@@ -128,6 +128,21 @@ find ~/.codex/plugins/cache/loadout/<plugin> -maxdepth 2 -name package.json -pri
 For CLI plugins, verify the new command surface through the installed command
 or cache path.
 
+### PATH Shims
+
+Plugin CLIs reach the shell through hand-written shims in `~/.local/bin/`
+(`whatsapp`, `elevenlabs`) that exec an absolute path into the marketplace
+checkout. They are not managed by any installer, so nothing updates them
+automatically. Re-point every shim whenever the marketplace name, the repo
+name, or the checkout location changes, then run each command once to
+confirm:
+
+```bash
+grep -rl "marketplaces/" ~/.local/bin/
+whatsapp --json doctor
+elevenlabs --help
+```
+
 ## Upgrade Claude Code
 
 Claude Code has a separate marketplace checkout, install manifest, and cache:

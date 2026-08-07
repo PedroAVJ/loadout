@@ -1,6 +1,6 @@
 {
   "name": "elevenlabs",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Use ElevenLabs audio and speech tools from Codex or Claude Code.",
   "author": {
     "name": "PedroAVJ",
@@ -9,6 +9,11 @@
   "homepage": "https://elevenlabs.io/",
   "repository": "https://github.com/PedroAVJ/loadout",
   "license": "MIT",
-  "keywords": ["elevenlabs", "audio", "speech", "scribe"],
+  "keywords": [
+    "elevenlabs",
+    "audio",
+    "speech",
+    "scribe"
+  ],
   "skills": "./skills/"
 }
