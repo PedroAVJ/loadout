@@ -72,11 +72,28 @@ Source the IDs from the local `ytx` cache — free:
 ytx db query "SELECT video_id, title FROM playlist_items WHERE title LIKE '%<term>%'"
 ```
 
-**Autoplay is the sharp edge.** A temp queue ends, and playback continues
-into algorithmic recommendations — which is how an unrelated, attention-
-grabbing track arrives mid-session and looks like a curation failure. Either
-end the queue with a long compilation, tell the user to switch autoplay off,
-or accept it and warn them.
+**Autoplay is the sharp edge, and it cannot be switched off.** Playback
+continues past a finite queue into algorithmic recommendations — which is how
+an unrelated, attention-grabbing track arrives mid-session and reads as a
+curation failure.
+
+On `music.youtube.com` this is worse than it looks. A short playlist gets a
+radio tail appended **at load time**, verified against a 6-track playlist that
+loaded as a 65-item queue. None of these prevent it:
+
+- the queue panel's **Autoplay toggle** ("Add similar content to the end of
+  the queue") — the tail still appears with it off, and the setting does not
+  survive a reload;
+- the **entry point** — a `watch?v=…&list=…` URL and the playlist page's own
+  Play button produce the same tail;
+- **Repeat all** — it loops the queue, and the queue already includes the tail.
+
+So do not promise a user a clean queue. The only real defenses are a pool long
+enough that a session never reaches the tail, and warning them that whatever
+plays after the last curated track is the algorithm talking. Expect the tail to
+be *adjacent* to the seed rather than random — which is exactly why it slips
+past: it sounds close enough to belong while breaking the selection criteria
+the pool was built on.
 
 **Temp queues are a youtube.com mechanism.** A user who listens on YouTube
 Music — especially on a phone, where a session URL is useless — needs
