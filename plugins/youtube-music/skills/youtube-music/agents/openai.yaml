@@ -1,0 +1,7 @@
+interface:
+  display_name: "YouTube Music"
+  short_description: "Play YouTube Music and build throwaway queues"
+  icon_small: "./assets/youtube-music.svg"
+  icon_large: "./assets/youtube-music.svg"
+  brand_color: "#FF0000"
+  default_prompt: "Use $youtube-music to play a playlist or assemble a zero-quota listening queue."

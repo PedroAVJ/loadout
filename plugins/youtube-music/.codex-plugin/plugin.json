@@ -1,0 +1,46 @@
+{
+  "name": "youtube-music",
+  "version": "0.1.0",
+  "description": "Play and curate YouTube Music: throwaway session queues, a validated focus pool, and macOS Background Sounds control.",
+  "author": {
+    "name": "PedroAVJ",
+    "url": "https://github.com/PedroAVJ"
+  },
+  "homepage": "https://music.youtube.com/",
+  "repository": "https://github.com/PedroAVJ/loadout",
+  "license": "MIT",
+  "keywords": [
+    "youtube-music",
+    "music",
+    "playback",
+    "focus",
+    "background-sounds",
+    "playlists",
+    "ytx"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "YouTube Music",
+    "shortDescription": "Play YouTube Music and compose focus soundscapes",
+    "longDescription": "Play and curate the listening surface over the shared YouTube library. Builds throwaway session queues that cost zero API quota, curates a validated focus pool through an audition-then-promote funnel, and controls the macOS Background Sounds layer (rain and friends) so a work-session soundscape can be set in one step. Uses the ytx CLI for library writes.",
+    "developerName": "PedroAVJ",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://music.youtube.com/",
+    "privacyPolicyURL": "https://policies.google.com/privacy",
+    "termsOfServiceURL": "https://policies.google.com/terms",
+    "defaultPrompt": [
+      "Put on focus music for a work session",
+      "Build me a throwaway queue from my focus pool",
+      "Turn the rain background sound down"
+    ],
+    "brandColor": "#FF0000",
+    "composerIcon": "./assets/youtube-music.svg",
+    "logo": "./assets/youtube-music.svg",
+    "screenshots": []
+  }
+}

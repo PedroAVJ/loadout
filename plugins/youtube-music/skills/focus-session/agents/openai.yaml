@@ -1,0 +1,7 @@
+interface:
+  display_name: "Focus Session"
+  short_description: "Compose a work-session soundscape"
+  icon_small: "./assets/youtube-music.svg"
+  icon_large: "./assets/youtube-music.svg"
+  brand_color: "#FF0000"
+  default_prompt: "Use $focus-session to set up sound for focused work and curate a validated focus pool."

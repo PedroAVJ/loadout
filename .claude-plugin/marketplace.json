@@ -103,6 +103,13 @@
       "category": "productivity",
       "source": "./plugins/youtube-cli",
       "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/youtube-cli"
+    },
+    {
+      "name": "youtube-music",
+      "description": "Play YouTube Music, build zero-quota session queues, and control macOS Background Sounds.",
+      "category": "productivity",
+      "source": "./plugins/youtube-music",
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/youtube-music"
     }
   ]
 }
