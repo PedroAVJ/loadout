@@ -27,6 +27,7 @@ It is intentionally practical:
 | [`plugins/google-drive-cli`](./plugins/google-drive-cli) | Open | Google Drive search, download, export, upload, and permission workflows through `gws`. |
 | [`plugins/google-tasks`](./plugins/google-tasks) | Open | Google Tasks reads and guarded mutations through `gws`. |
 | [`plugins/google-contacts`](./plugins/google-contacts) | Open | Google Contacts identity, phone, organization, and WhatsApp-enrichment lookups through `gws`. |
+| [`plugins/youtube-cli`](./plugins/youtube-cli) | Open | YouTube playlist reads and guarded edits through the `ytx` CLI, with a SQLite cache and quota accounting. |
 | [`plugins/elevenlabs`](./plugins/elevenlabs) | Open | ElevenLabs Scribe transcription workflows with diarization, language hints, and keyterms. |
 | [`plugins/claude`](./plugins/claude) | Open | Codex-stewarded Claude Fable frontend implementation and visual-explainer workflows with streamed logs. |
 | [`plugins/android-phone`](./plugins/android-phone) | Open | Android phone inspection, testing, debugging, and control through ADB. |
@@ -87,6 +88,7 @@ plugins/gmail-cli
 plugins/google-drive-cli
 plugins/google-tasks
 plugins/google-contacts
+plugins/youtube-cli
 plugins/elevenlabs
 plugins/claude
 plugins/android-phone
@@ -96,7 +98,7 @@ plugins/symphony
 Or from the CLI:
 
 ```bash
-codex plugin marketplace add PedroAVJ/loadout --ref main --sparse .agents/plugins --sparse plugins/loadout --sparse plugins/google-cloud --sparse plugins/macbook --sparse plugins/codex-app --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/elevenlabs --sparse plugins/claude --sparse plugins/android-phone --sparse plugins/symphony
+codex plugin marketplace add PedroAVJ/loadout --ref main --sparse .agents/plugins --sparse plugins/loadout --sparse plugins/google-cloud --sparse plugins/macbook --sparse plugins/codex-app --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/youtube-cli --sparse plugins/elevenlabs --sparse plugins/claude --sparse plugins/android-phone --sparse plugins/symphony
 codex plugin marketplace upgrade
 ```
 
@@ -105,7 +107,7 @@ Leave sparse paths blank if you want Codex to fetch the whole marketplace repo. 
 ### Install In Claude Code
 
 ```bash
-claude plugin marketplace add PedroAVJ/loadout --sparse .claude-plugin --sparse plugins/loadout --sparse plugins/google-cloud --sparse plugins/macbook --sparse plugins/codex-app --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/elevenlabs --sparse plugins/android-phone --sparse plugins/symphony
+claude plugin marketplace add PedroAVJ/loadout --sparse .claude-plugin --sparse plugins/loadout --sparse plugins/google-cloud --sparse plugins/macbook --sparse plugins/codex-app --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/youtube-cli --sparse plugins/elevenlabs --sparse plugins/android-phone --sparse plugins/symphony
 claude plugin install loadout@loadout
 ```
 

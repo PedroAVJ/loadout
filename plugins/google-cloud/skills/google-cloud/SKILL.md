@@ -29,7 +29,7 @@ relying on ambient `gcloud config` state.
 | `pedro-app-storage-20260801` | **The substrate.** App storage, artifact publishing, and production backups. Three buckets — see the `storage` skill. |
 | `diana-play-publishing-20260505` | Google Play publishing for Diana's app. No buckets. |
 | `gen-lang-client-0997216309` | Gemini API. Carries Vertex/AI-platform staging buckets that are not general-purpose storage. |
-| `inbound-study-429220-m9` | `google-places-demo`. Legacy/demo. No buckets. |
+| `inbound-study-429220-m9` | **The personal-agent identity**, display name "Pedro Personal Agent". Holds the Desktop OAuth client behind every `gws` call (Gmail, Drive, Calendar, Docs, Sheets, Tasks, People) and the YouTube Data API behind `ytx`. No buckets. Do not delete — the opaque project ID is permanent and says nothing about what it carries. |
 
 ```bash
 gcloud projects list

@@ -96,6 +96,13 @@
       "category": "productivity",
       "source": "./plugins/google-cloud",
       "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/google-cloud"
+    },
+    {
+      "name": "youtube-cli",
+      "description": "Read and edit YouTube playlists through the ytx CLI over the YouTube Data API v3.",
+      "category": "productivity",
+      "source": "./plugins/youtube-cli",
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/youtube-cli"
     }
   ]
 }
