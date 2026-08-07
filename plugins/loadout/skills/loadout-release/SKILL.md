@@ -47,11 +47,17 @@ git fetch origin main
 If another checkout is in use, verify its remote is
 `https://github.com/PedroAVJ/loadout.git`.
 
-Both client checkouts are **sparse**. They only materialize the plugin paths
-they were installed with, so a brand-new plugin is invisible to both clients
-until its path is added — see "Publishing a New Plugin to the Clients" below.
-That step is only needed once per plugin; ordinary version bumps to an
-already-listed plugin do not touch sparse config.
+Client checkouts must be **full, not sparse**. A sparse checkout freezes the
+plugin list at the moment the marketplace was added, so every plugin created
+afterwards is invisible and reports `failed to load` — and `marketplace update`
+re-fetches the same frozen list, so it never self-heals. Check before releasing:
+
+```bash
+python3 -c "import json,os;d=json.load(open(os.path.expanduser('~/.claude/plugins/known_marketplaces.json')));print(d['loadout']['source'].get('sparsePaths','full checkout — good'))"
+```
+
+If that prints a path list, re-add the marketplace without `--sparse`; see
+"Publishing a New Plugin to the Clients" below.
 
 ## Change Checklist
 
@@ -199,8 +205,7 @@ other:
 3. `plugins/<plugin>/README.md`.
 4. An entry in `.claude-plugin/marketplace.json`.
 5. An entry in `.agents/plugins/marketplace.json`.
-6. A row in the root `README.md` module table, and the plugin's sparse path
-   added to both install snippets there.
+6. A row in the root `README.md` module table.
 
 Both marketplace manifests are hand-maintained, and every item above is
 checked by `pnpm test:structure`. Stage the new plugin first — the structure
@@ -213,41 +218,11 @@ pnpm test:structure
 
 ## Publishing a New Plugin to the Clients
 
-Once per new plugin, after it is pushed. Skipping this is the failure mode
-where the repo, both marketplace manifests, and `main` all look correct while
-the install still fails with `Source path does not exist`.
-
-Each client stores its sparse path list in its own client config and pushes
-it *down* into the checkout on every marketplace refresh. Editing the git
-checkout — or the install record inside it — is therefore useless on its own:
-the next refresh regenerates both from the config and silently drops the
-addition. Edit the config, then refresh.
-
-**Claude Code** — `~/.claude/plugins/known_marketplaces.json`, at
-`loadout.source.sparsePaths`:
+Once per new plugin, after it is pushed. On a full checkout the path is
+already there, so this is only an install:
 
 ```bash
-python3 - <<'PY'
-import json, os
-p = os.path.expanduser("~/.claude/plugins/known_marketplaces.json")
-d = json.load(open(p))
-sp = d["loadout"]["source"]["sparsePaths"]
-if "plugins/<plugin>" not in sp:
-    sp.append("plugins/<plugin>")
-    json.dump(d, open(p, "w"), indent=2)
-print(sp)
-PY
-claude plugin marketplace update loadout
 claude plugin install <plugin>@loadout
-```
-
-**Codex** — `~/.codex/config.toml`, at `[marketplaces.loadout].sparse_paths`.
-This is a single-line TOML array; add the entry by hand. The install record
-at `~/.codex/.tmp/marketplaces/loadout/.codex-marketplace-install.json` is
-generated from it, so never edit that file:
-
-```bash
-codex plugin marketplace upgrade
 codex plugin add <plugin>@loadout
 ```
 
@@ -262,9 +237,33 @@ confirm the path actually materialized:
 ls ~/.claude/plugins/marketplaces/loadout/plugins/ ~/.codex/.tmp/marketplaces/loadout/plugins/
 ```
 
-Two symptoms of a missed sparse path, both of which look like a repo problem
-and are not: `Source path does not exist` on install, and
-`plugin source path is not a directory` on upgrade.
+### If The Checkout Is Sparse
+
+Symptoms that look like a repo problem and are not: `failed to load` with
+`Plugin directory not found`, `Source path does not exist` on install, and
+`plugin source path is not a directory` on upgrade — all for a plugin that is
+demonstrably on `main`.
+
+Do not patch the path list; it will only go stale again at the next new
+plugin. Re-add the marketplace without `--sparse`, which converts it to a full
+checkout in place and leaves installed plugins intact:
+
+```bash
+claude plugin marketplace add PedroAVJ/loadout
+```
+
+For Codex, clear `sparse_paths` under `[marketplaces.loadout]` in
+`~/.codex/config.toml`, then `codex plugin marketplace upgrade`. The install
+record at `~/.codex/.tmp/marketplaces/loadout/.codex-marketplace-install.json`
+is generated from that config, so never edit it directly.
+
+A renamed plugin leaves its own stale install entry behind. Uninstall the old
+name and install the new one:
+
+```bash
+claude plugin uninstall <old-name>@loadout
+claude plugin install <new-name>@loadout
+```
 
 ## Validate Before Pushing
 

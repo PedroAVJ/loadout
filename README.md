@@ -79,45 +79,35 @@ In the Codex app, open Plugins -> Manage -> Add marketplace:
 ```text
 Source: PedroAVJ/loadout
 Git ref: main
-Sparse paths:
-.agents/plugins
-plugins/loadout
-plugins/google-cloud
-plugins/macbook
-plugins/codex
-plugins/whatsapp
-plugins/gmail-cli
-plugins/google-drive-cli
-plugins/google-tasks
-plugins/google-contacts
-plugins/youtube-cli
-plugins/youtube-music
-plugins/elevenlabs
-plugins/claude
-plugins/android-phone
-plugins/symphony
-plugins/voice-memos
-plugins/call-recordings
-plugins/sentry
+Sparse paths: (leave blank)
 ```
 
 Or from the CLI:
 
 ```bash
-codex plugin marketplace add PedroAVJ/loadout --ref main --sparse .agents/plugins --sparse plugins/loadout --sparse plugins/google-cloud --sparse plugins/macbook --sparse plugins/codex --sparse plugins/whatsapp --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/youtube-cli --sparse plugins/youtube-music --sparse plugins/elevenlabs --sparse plugins/claude --sparse plugins/android-phone --sparse plugins/symphony --sparse plugins/voice-memos --sparse plugins/call-recordings --sparse plugins/sentry
+codex plugin marketplace add PedroAVJ/loadout --ref main
 codex plugin marketplace upgrade
 ```
-
-Leave sparse paths blank if you want Codex to fetch the whole marketplace repo. The sparse paths above are the minimal set for the marketplace manifest plus the current plugins.
 
 ### Install In Claude Code
 
 ```bash
-claude plugin marketplace add PedroAVJ/loadout --sparse .claude-plugin --sparse plugins/loadout --sparse plugins/google-cloud --sparse plugins/macbook --sparse plugins/codex --sparse plugins/whatsapp --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/youtube-cli --sparse plugins/youtube-music --sparse plugins/elevenlabs --sparse plugins/android-phone --sparse plugins/symphony --sparse plugins/voice-memos --sparse plugins/call-recordings --sparse plugins/sentry
+claude plugin marketplace add PedroAVJ/loadout
 claude plugin install loadout@loadout
 ```
 
-Install the other Claude-compatible plugins from the same marketplace as needed.
+Install the other plugins from the same marketplace as needed.
+
+### Do Not Use Sparse Paths
+
+Both clients accept `--sparse` to limit the checkout to named directories. Do
+not use it here. The path list is frozen at the moment you add the marketplace,
+so every plugin added to this repo afterwards is missing from your checkout and
+reports `failed to load` — and `marketplace update` does not fix it, because it
+re-fetches the same frozen list. Renaming a plugin breaks it the same way.
+
+A full checkout costs about 5 MiB and never goes stale.
+
 
 ### Develop Locally
 
