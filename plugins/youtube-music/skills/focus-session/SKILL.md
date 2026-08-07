@@ -62,9 +62,11 @@ A pool earns trust by surviving work, not by sounding right in the abstract.
 
 1. **Pool of record is a real playlist**, not agent memory. The user must be
    able to open and shuffle it without an agent in the loop.
-2. **Audition somewhere provisional.** Throwaway queues where the user
-   listens on YouTube; a separate, explicitly-provisional auditions playlist
-   where they listen on YouTube Music or a phone. Never the good pool.
+2. **Get candidates in front of them.** A separate auditions playlist is the
+   tidy option, but it only works if they actually play it. When the pool is
+   a looping work soundtrack, mixing a few untested tracks straight into it
+   is better: they get heard under real conditions instead of sitting in a
+   playlist nobody opens. Mark which ones are on trial, and prune on report.
 3. **Promote on survival.** A track that got through a work block without
    pulling attention graduates: `ytx items add <pool-id> <video-id>`.
 4. **Record rejects durably**, with the reason, so nothing is auditioned

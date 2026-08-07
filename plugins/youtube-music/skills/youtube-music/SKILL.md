@@ -72,28 +72,31 @@ Source the IDs from the local `ytx` cache — free:
 ytx db query "SELECT video_id, title FROM playlist_items WHERE title LIKE '%<term>%'"
 ```
 
-**Autoplay is the sharp edge, and it cannot be switched off.** Playback
-continues past a finite queue into algorithmic recommendations — which is how
-an unrelated, attention-grabbing track arrives mid-session and reads as a
-curation failure.
-
-On `music.youtube.com` this is worse than it looks. A short playlist gets a
-radio tail appended **at load time**, verified against a 6-track playlist that
-loaded as a 65-item queue. None of these prevent it:
-
-- the queue panel's **Autoplay toggle** ("Add similar content to the end of
-  the queue") — the tail still appears with it off, and the setting does not
-  survive a reload;
-- the **entry point** — a `watch?v=…&list=…` URL and the playlist page's own
-  Play button produce the same tail;
-- **Repeat all** — it loops the queue, and the queue already includes the tail.
-
-So do not promise a user a clean queue. The only real defenses are a pool long
-enough that a session never reaches the tail, and warning them that whatever
-plays after the last curated track is the algorithm talking. Expect the tail to
-be *adjacent* to the seed rather than random — which is exactly why it slips
-past: it sounds close enough to belong while breaking the selection criteria
+**Autoplay is the sharp edge.** By default a short playlist loads with a
+radio tail appended — a 6-track playlist becoming a ~65-item queue — so
+playback runs past the curated material into recommendations. The tail is
+*adjacent* to the seed rather than random, which is exactly why it slips past
+unnoticed: it sounds close enough to belong while breaking whatever criteria
 the pool was built on.
+
+It is switchable, with one ordering trap:
+
+1. Open the queue panel and turn off **Autoplay** ("Add similar content to the
+   end of the queue").
+2. **Reload or restart the playlist.** The toggle does not retroactively clear
+   a queue that already has its tail — checking immediately after toggling
+   shows the tail still there and looks like the setting failed.
+3. Confirm: the queue panel renders an **"Autoplay is off"** divider, and the
+   queue holds exactly the playlist's tracks.
+
+Pair it with **Repeat all** for a pool that loops indefinitely without ever
+reaching a recommendation. That combination — not a longer pool — is the
+actual fix for "I want only my curated tracks."
+
+Counting the queue in JS: `querySelectorAll('ytmusic-player-queue-item')`
+**over-counts badly** (76 for a 12-track queue) because wrapper renderers nest
+their own items and off-queue content stays in the DOM. Count the children of
+`ytmusic-player-queue #contents` instead.
 
 **Temp queues are a youtube.com mechanism.** A user who listens on YouTube
 Music — especially on a phone, where a session URL is useless — needs
