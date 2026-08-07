@@ -1,7 +1,7 @@
 {
   "name": "claude",
-  "version": "0.1.6",
-  "description": "Use Claude Code from Codex for stewarded frontend implementation and visual explainer workflows.",
+  "version": "0.2.0",
+  "description": "Use Claude Code from Codex for stewarded frontend implementation, visual explainers, and Claude Fable 5 second opinions.",
   "author": {
     "name": "PedroAVJ",
     "url": "https://github.com/PedroAVJ"
@@ -13,13 +13,17 @@
     "claude",
     "claude-code",
     "anthropic",
-    "collaboration"
+    "collaboration",
+    "oracle",
+    "claude-fable-5",
+    "second-opinion",
+    "model-verification"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Claude",
-    "shortDescription": "Build frontend UI with Claude Opus 5",
-    "longDescription": "Use Claude Opus 5 for the first implementation pass on browser-visible product UI and for visual direction on polished single-file HTML explainers. Codex remains responsible for scope, diff review, cleanup, verification, and shipping judgment.",
+    "shortDescription": "Reach Claude from Codex",
+    "longDescription": "Every way Codex spends Claude tokens, in one place. Claude Opus 5 takes the first implementation pass on browser-visible product UI and gives visual direction on polished single-file HTML explainers; Claude Fable 5 answers as Oracle when a decision needs a second opinion. All three verify the answering model against Claude Code's own usage metadata and fail closed rather than pass off a fallback. Codex remains responsible for scope, diff review, cleanup, verification, and shipping judgment.",
     "developerName": "PedroAVJ",
     "category": "Productivity",
     "capabilities": [
@@ -32,7 +36,8 @@
     "termsOfServiceURL": "https://www.anthropic.com/legal/consumer-terms",
     "defaultPrompt": [
       "Ask Claude Opus 5 to implement a UI pass",
-      "Make an HTML explainer"
+      "Make an HTML explainer",
+      "Ask Oracle for Claude Fable 5's second opinion"
     ],
     "brandColor": "#D97757",
     "composerIcon": "./assets/claude-mobile-app-icon.jpg",

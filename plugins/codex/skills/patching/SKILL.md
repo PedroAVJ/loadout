@@ -5,8 +5,15 @@ description: Patch, re-sign, or restore the local macOS Codex desktop app bundle
 
 # Codex App Patching
 
-Local surgery on `/Applications/Codex.app`. Careful forensics and patch
+Local surgery on the installed Codex desktop app. Careful forensics and patch
 workflow, not general app development.
+
+Resolve the bundle by identifier, never by name — it shipped as `Codex.app`
+and is `ChatGPT.app` as of 26.803, while `com.openai.codex` stayed put:
+
+```bash
+APP=$(mdfind "kMDItemCFBundleIdentifier == 'com.openai.codex'" | head -1)
+```
 
 ## Read This Before Patching
 

@@ -24,6 +24,17 @@ model, handle that as a distinct request and do not represent it as Oracle.
 The static dossier and zip helpers under this skill directory are legacy tools.
 Use them only when the user explicitly asks for an uploadable bundle.
 
+## Host Scope
+
+Oracle is Codex-hosted. It reaches Claude Fable 5 from outside the Anthropic
+family, which is the entire point of a second opinion.
+
+If you are Claude Code, do not run this skill — you would spawn a nested CLI to
+ask the Claude family for an opinion on your own work and present it as an
+outside one. `scripts/oracle_fable.py` refuses when `$CLAUDECODE` is set and
+exits 2. Answer directly instead, and say plainly that no outside model was
+consulted.
+
 ## When To Use
 
 Use this skill when the user says things like:

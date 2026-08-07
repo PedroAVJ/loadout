@@ -21,7 +21,6 @@ It is intentionally practical:
 | --- | --- | --- |
 | [`plugins/loadout`](./plugins/loadout) | Open | The recursive one: find and vet skills, install MCP servers, and release the plugins in this repo to both clients. |
 | [`plugins/google-cloud`](./plugins/google-cloud) | Open | Google Cloud through the `gcloud` CLI: project inventory, the Cloud Storage substrate and its write boundary, and artifact publishing to durable URLs. |
-| [`plugins/oracle`](./plugins/oracle) | Open | Codex-hosted Claude Fable 5 second opinion through Claude Code with fail-closed model verification. |
 | [`plugins/whatsapp`](./plugins/whatsapp) | Open | WhatsApp bridge, SQLite-backed reads, media/context tools, reviewable drafts, and guarded sends for Codex and Claude Code. |
 | [`plugins/gmail-cli`](./plugins/gmail-cli) | Open | Gmail raw-message, MIME, and attachment workflows through the authenticated `gws` CLI. |
 | [`plugins/google-drive-cli`](./plugins/google-drive-cli) | Open | Google Drive search, download, export, upload, and permission workflows through `gws`. |
@@ -30,11 +29,11 @@ It is intentionally practical:
 | [`plugins/youtube-cli`](./plugins/youtube-cli) | Open | YouTube playlist reads and guarded edits through the `ytx` CLI, with a SQLite cache and quota accounting. |
 | [`plugins/youtube-music`](./plugins/youtube-music) | Open | YouTube Music playback, zero-quota session queues, a validated focus pool, and macOS Background Sounds control. |
 | [`plugins/elevenlabs`](./plugins/elevenlabs) | Open | ElevenLabs Scribe transcription workflows with diarization, language hints, and keyterms. |
-| [`plugins/claude`](./plugins/claude) | Open | Codex-stewarded Claude Fable frontend implementation and visual-explainer workflows with streamed logs. |
+| [`plugins/claude`](./plugins/claude) | Codex-only | Every way Codex reaches Claude: Opus 5 frontend implementation, visual explainers, and Fable 5 Oracle second opinions — all fail-closed on model identity. |
 | [`plugins/android-phone`](./plugins/android-phone) | Open | Android phone inspection, testing, debugging, and control through ADB. |
 | [`plugins/symphony`](./plugins/symphony) | Open | Agent lifecycle workflows for evidence intake, issue coverage, Codex review, review artifacts, and explicit merge/release proof. |
 | [`plugins/macbook`](./plugins/macbook) | Open | MacBook heat, memory pressure, and disk headroom as three separate read-only diagnoses. |
-| [`plugins/codex-app`](./plugins/codex-app) | Open | Read the local Codex desktop app's internals for feature flags and gated behavior; patch and restore the bundle when necessary. |
+| [`plugins/codex`](./plugins/codex) | Open | Read the local Codex desktop app's internals for feature flags and gated behavior; patch and restore the bundle when necessary. Resolves the app by bundle id, surviving the `Codex.app` to `ChatGPT.app` rename. |
 | [`plugins/voice-memos`](./plugins/voice-memos) | Open | Read the macOS Voice Memos store — recordings, metadata, and Apple's embedded transcripts. |
 | [`plugins/call-recordings`](./plugins/call-recordings) | Open | Read Apple call recordings out of the macOS Notes store — calls, timing, audio paths, and Apple's transcripts. |
 | [`plugins/sentry`](./plugins/sentry) | Open | Read and triage Sentry through the sentry CLI — issues, events, logs, traces, and the distinctions between them. |
@@ -85,9 +84,8 @@ Sparse paths:
 plugins/loadout
 plugins/google-cloud
 plugins/macbook
-plugins/codex-app
+plugins/codex
 plugins/whatsapp
-plugins/oracle
 plugins/gmail-cli
 plugins/google-drive-cli
 plugins/google-tasks
@@ -106,7 +104,7 @@ plugins/sentry
 Or from the CLI:
 
 ```bash
-codex plugin marketplace add PedroAVJ/loadout --ref main --sparse .agents/plugins --sparse plugins/loadout --sparse plugins/google-cloud --sparse plugins/macbook --sparse plugins/codex-app --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/youtube-cli --sparse plugins/youtube-music --sparse plugins/elevenlabs --sparse plugins/claude --sparse plugins/android-phone --sparse plugins/symphony --sparse plugins/voice-memos --sparse plugins/call-recordings --sparse plugins/sentry
+codex plugin marketplace add PedroAVJ/loadout --ref main --sparse .agents/plugins --sparse plugins/loadout --sparse plugins/google-cloud --sparse plugins/macbook --sparse plugins/codex --sparse plugins/whatsapp --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/youtube-cli --sparse plugins/youtube-music --sparse plugins/elevenlabs --sparse plugins/claude --sparse plugins/android-phone --sparse plugins/symphony --sparse plugins/voice-memos --sparse plugins/call-recordings --sparse plugins/sentry
 codex plugin marketplace upgrade
 ```
 
@@ -115,7 +113,7 @@ Leave sparse paths blank if you want Codex to fetch the whole marketplace repo. 
 ### Install In Claude Code
 
 ```bash
-claude plugin marketplace add PedroAVJ/loadout --sparse .claude-plugin --sparse plugins/loadout --sparse plugins/google-cloud --sparse plugins/macbook --sparse plugins/codex-app --sparse plugins/whatsapp --sparse plugins/oracle --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/youtube-cli --sparse plugins/youtube-music --sparse plugins/elevenlabs --sparse plugins/android-phone --sparse plugins/symphony --sparse plugins/voice-memos --sparse plugins/call-recordings --sparse plugins/sentry
+claude plugin marketplace add PedroAVJ/loadout --sparse .claude-plugin --sparse plugins/loadout --sparse plugins/google-cloud --sparse plugins/macbook --sparse plugins/codex --sparse plugins/whatsapp --sparse plugins/gmail-cli --sparse plugins/google-drive-cli --sparse plugins/google-tasks --sparse plugins/google-contacts --sparse plugins/youtube-cli --sparse plugins/youtube-music --sparse plugins/elevenlabs --sparse plugins/android-phone --sparse plugins/symphony --sparse plugins/voice-memos --sparse plugins/call-recordings --sparse plugins/sentry
 claude plugin install loadout@loadout
 ```
 

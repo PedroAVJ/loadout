@@ -14,13 +14,6 @@
       "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/whatsapp"
     },
     {
-      "name": "oracle",
-      "description": "Ask Claude Fable 5 through Claude Code for a fail-closed, identity-verified second opinion.",
-      "category": "productivity",
-      "source": "./plugins/oracle",
-      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/oracle"
-    },
-    {
       "name": "gmail-cli",
       "description": "Use Gmail raw-message, MIME, and attachment workflows through the authenticated gws CLI.",
       "category": "productivity",
@@ -84,11 +77,11 @@
       "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/macbook"
     },
     {
-      "name": "codex-app",
-      "description": "Inspect the local Codex desktop app's internals, and patch or restore its bundle.",
+      "name": "codex",
+      "description": "Work with OpenAI Codex: inspect the desktop app's internals, and patch or restore its bundle.",
       "category": "productivity",
-      "source": "./plugins/codex-app",
-      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/codex-app"
+      "source": "./plugins/codex",
+      "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/codex"
     },
     {
       "name": "google-cloud",
@@ -113,21 +106,21 @@
     },
     {
       "name": "voice-memos",
-      "description": "Read the macOS Voice Memos store — recordings, metadata, and Apple's embedded transcripts.",
+      "description": "Read the macOS Voice Memos store \u2014 recordings, metadata, and Apple's embedded transcripts.",
       "category": "productivity",
       "source": "./plugins/voice-memos",
       "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/voice-memos"
     },
     {
       "name": "call-recordings",
-      "description": "Read Apple call recordings out of the macOS Notes store — calls, timing, audio paths, and Apple's transcripts.",
+      "description": "Read Apple call recordings out of the macOS Notes store \u2014 calls, timing, audio paths, and Apple's transcripts.",
       "category": "productivity",
       "source": "./plugins/call-recordings",
       "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/call-recordings"
     },
     {
       "name": "sentry",
-      "description": "Read and triage Sentry through the sentry CLI — issues, events, logs, traces, and the distinctions between them.",
+      "description": "Read and triage Sentry through the sentry CLI \u2014 issues, events, logs, traces, and the distinctions between them.",
       "category": "productivity",
       "source": "./plugins/sentry",
       "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/sentry"

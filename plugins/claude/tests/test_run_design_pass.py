@@ -1,7 +1,10 @@
 import importlib.util
 import json
+import os
 import pathlib
+import sys
 import unittest
+from unittest import mock
 
 
 SCRIPT_PATH = pathlib.Path(__file__).parents[1] / "scripts" / "run_design_pass.py"
@@ -58,14 +61,28 @@ class BuildCommandTests(unittest.TestCase):
             )
         )
 
-        self.assertEqual("0.1.6", manifest["version"])
+        self.assertEqual("0.2.0", manifest["version"])
         self.assertIn("Claude Opus 5", skill)
         self.assertIn("--model claude-opus-5", skill)
         self.assertIn("`claude-opus-5`", readme)
         self.assertIn("Claude Opus 5", manifest["interface"]["longDescription"])
-        for text in (skill, readme, json.dumps(manifest)):
-            self.assertNotIn("Fable", text)
-            self.assertNotIn("--model fable", text)
+
+        # The plugin now also hosts oracle, so Fable may appear at plugin level.
+        # The frontend pass itself must never drift onto it.
+        self.assertNotIn("Fable", skill)
+        self.assertNotIn("--model fable", skill)
+
+    def test_design_pass_refuses_to_run_inside_claude_code(self):
+        argv = ["run_design_pass.py", "--repo", "/tmp/repo"]
+        with mock.patch.object(sys, "argv", argv):
+            with mock.patch.dict(os.environ, {"CLAUDECODE": "1"}):
+                # Must refuse before spawning anything; a nested Claude Code call
+                # would ask the running model to second-opinion itself.
+                self.assertEqual(2, MODULE.main())
+
+    def test_design_pass_disables_model_fallback(self):
+        environment = MODULE.claude_environment()
+        self.assertEqual("1", environment["CLAUDE_CODE_NO_MODEL_FALLBACK"])
 
 
 if __name__ == "__main__":

@@ -4,11 +4,22 @@
 from __future__ import annotations
 
 import json
-import os
+import pathlib
 import shutil
 import subprocess
 import sys
 from typing import Any
+
+
+# Shared host guard and fallback-disabled environment live at the plugin root,
+# so oracle and the frontend passes cannot drift apart on these invariants.
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3] / "scripts"))
+
+from claude_host import (  # noqa: E402
+    HostGuardError,
+    assert_foreign_host,
+    claude_environment,
+)
 
 
 FABLE_CANONICAL_MODEL = "claude-fable-5"
@@ -74,13 +85,13 @@ def validate_fable_result(payload: Any) -> None:
         )
 
 
-def _claude_environment() -> dict[str, str]:
-    environment = os.environ.copy()
-    environment["CLAUDE_CODE_NO_MODEL_FALLBACK"] = "1"
-    return environment
-
-
 def main() -> int:
+    try:
+        assert_foreign_host("oracle")
+    except HostGuardError as error:
+        print(f"oracle_fable: refused: {error}", file=sys.stderr)
+        return 2
+
     prompt = sys.stdin.read()
     if not prompt.strip():
         print("oracle_fable: prompt is empty", file=sys.stderr)
@@ -115,7 +126,7 @@ def main() -> int:
         text=True,
         capture_output=True,
         check=False,
-        env=_claude_environment(),
+        env=claude_environment(),
     )
     if completed.returncode != 0:
         message = completed.stderr.strip() or completed.stdout.strip()

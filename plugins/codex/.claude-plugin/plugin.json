@@ -1,16 +1,18 @@
 {
-  "name": "codex-app",
-  "version": "0.1.0",
-  "description": "Read the local macOS Codex desktop app's internals, and patch or restore its bundle when necessary.",
+  "name": "codex",
+  "version": "0.2.0",
+  "description": "Work with OpenAI Codex from Claude Code: read the local Codex desktop app's internals, and patch or restore its bundle when necessary.",
   "author": {
     "name": "PedroAVJ",
     "url": "https://github.com/PedroAVJ"
   },
-  "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/codex-app",
+  "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/codex",
   "repository": "https://github.com/PedroAVJ/loadout",
   "license": "MIT",
   "keywords": [
     "codex",
+    "chatgpt",
+    "openai",
     "electron",
     "asar",
     "macos",

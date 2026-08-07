@@ -1,16 +1,18 @@
 {
-  "name": "codex-app",
-  "version": "0.1.0",
-  "description": "Read the local macOS Codex desktop app's internals, and patch or restore its bundle when necessary.",
+  "name": "codex",
+  "version": "0.2.0",
+  "description": "Read the local Codex desktop app's internals, and patch or restore its bundle when necessary.",
   "author": {
     "name": "PedroAVJ",
     "url": "https://github.com/PedroAVJ"
   },
-  "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/codex-app",
+  "homepage": "https://github.com/PedroAVJ/loadout/tree/main/plugins/codex",
   "repository": "https://github.com/PedroAVJ/loadout",
   "license": "MIT",
   "keywords": [
     "codex",
+    "chatgpt",
+    "openai",
     "electron",
     "asar",
     "macos",
@@ -19,9 +21,9 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Codex App",
+    "displayName": "Codex",
     "shortDescription": "Inspect and patch the local Codex desktop app",
-    "longDescription": "Extract and search the installed Codex.app Electron bundle for feature flags, gated behavior, and config keys without modifying it \u2014 and, when explicitly asked, patch the bundle with ASAR integrity repair, ad-hoc re-signing, and a documented restore path.",
+    "longDescription": "Extract and search the installed Codex desktop app's Electron bundle for feature flags, gated behavior, and config keys without modifying it — and, when explicitly asked, patch the bundle with ASAR integrity repair, ad-hoc re-signing, and a documented restore path. Resolves the app by bundle identifier, so it survives the Codex.app to ChatGPT.app rename.",
     "developerName": "PedroAVJ",
     "category": "Productivity",
     "capabilities": [
@@ -36,7 +38,7 @@
     "defaultPrompt": [
       "Does the installed Codex app already support this?",
       "What feature flags are in the current Codex build?",
-      "Restore Codex.app from the backup bundle"
+      "Restore the Codex app from the backup bundle"
     ]
   }
 }

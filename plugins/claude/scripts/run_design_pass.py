@@ -1,11 +1,20 @@
 #!/usr/bin/env python3
 import argparse
 import json
-import os
 import pathlib
 import subprocess
 import sys
 import time
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+
+from claude_host import (  # noqa: E402
+    HostGuardError,
+    ModelIdentityError,
+    assert_foreign_host,
+    assert_model_produced_output,
+    claude_environment,
+)
 
 
 PLUGIN_ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -59,6 +68,10 @@ def print_event(event):
         print(f"\n[claude:{event_type}] {event.get('subtype') or event.get('message') or ''}", flush=True)
 
 
+def is_result_event(event):
+    return (event.get("type") or event.get("event")) == "result"
+
+
 def build_command(repo, debug_log, mode, model, effort, prompt):
     permission_mode = "plan"
     tools = "Read,Glob,Grep,LS"
@@ -107,6 +120,12 @@ def main():
     parser.add_argument("--effort", default="medium", help="Claude effort level.")
     args = parser.parse_args()
 
+    try:
+        assert_foreign_host("frontend-ui / explainer")
+    except HostGuardError as error:
+        print(f"[claude-run] refused: {error}", file=sys.stderr)
+        return 2
+
     repo = pathlib.Path(args.repo).expanduser().resolve()
     prompt_file = args.prompt_file or str(DEFAULT_TEMPLATES[args.mode])
     prompt_path = pathlib.Path(prompt_file).expanduser().resolve()
@@ -137,9 +156,10 @@ def main():
         stderr=subprocess.STDOUT,
         text=True,
         bufsize=1,
-        env=os.environ.copy(),
+        env=claude_environment(),
     )
 
+    final_result = None
     with raw_log.open("w") as raw:
         assert process.stdout is not None
         for line in process.stdout:
@@ -153,11 +173,34 @@ def main():
             except json.JSONDecodeError:
                 print(stripped, flush=True)
                 continue
+            if is_result_event(event):
+                final_result = event
             print_event(event)
 
     return_code = process.wait()
     print(f"\n[claude-run] exit code: {return_code}")
-    return return_code
+
+    if return_code != 0:
+        return return_code
+
+    # A clean exit is not proof the requested model answered. Verify before the
+    # caller treats this pass as an Opus 5 implementation.
+    if final_result is None:
+        print(
+            "[claude-run] refused: the stream carried no result event, so the "
+            "answering model cannot be verified.",
+            file=sys.stderr,
+        )
+        return 3
+
+    try:
+        assert_model_produced_output(final_result.get("modelUsage"), args.model)
+    except ModelIdentityError as error:
+        print(f"[claude-run] refused: {error}", file=sys.stderr)
+        return 3
+
+    print(f"[claude-run] verified: {args.model} produced this pass.")
+    return 0
 
 
 if __name__ == "__main__":

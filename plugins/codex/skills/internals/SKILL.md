@@ -5,13 +5,29 @@ description: Read the internals of the local macOS Codex desktop app without mod
 
 # Codex App Internals
 
-Read-only forensics on `/Applications/Codex.app`. Extract, search, report —
-never write back. Patching is a separate skill (`patching`) with its own
-integrity and signing requirements, and it is deliberately not reachable from
-here.
+Read-only forensics on the installed Codex desktop app. Extract, search,
+report — never write back. Patching is a separate skill (`patching`) with its
+own integrity and signing requirements, and it is deliberately not reachable
+from here.
 
 This is the cheap way to answer "does the app already do this?" — much better
 than guessing from release notes, and much better than patching to find out.
+
+## Resolve The Bundle First
+
+**Never hardcode the app name.** OpenAI ships this app under changing display
+names — it was `Codex.app` and is `ChatGPT.app` as of 26.803 — while keeping
+the bundle identifier `com.openai.codex`. Resolve by identifier every time:
+
+```bash
+APP=$(mdfind "kMDItemCFBundleIdentifier == 'com.openai.codex'" | head -1)
+[ -n "$APP" ] || { echo "Codex app not installed"; exit 1; }
+echo "$APP"
+```
+
+Every path below is written relative to `$APP`. If `mdfind` returns nothing,
+Spotlight may be indexing — fall back to checking `/Applications/ChatGPT.app`
+and `/Applications/Codex.app` directly before reporting the app as absent.
 
 ## Why Read Instead of Guess
 
@@ -31,9 +47,12 @@ Every finding is version-scoped. Record it before anything else, and quote it
 in the answer — bundle names and minified identifiers change every release.
 
 ```bash
-defaults read /Applications/Codex.app/Contents/Info.plist CFBundleShortVersionString
-defaults read /Applications/Codex.app/Contents/Info.plist CFBundleVersion
+defaults read "$APP/Contents/Info.plist" CFBundleShortVersionString
+defaults read "$APP/Contents/Info.plist" CFBundleVersion
 ```
+
+Report the display name you found alongside the version — `ChatGPT 26.803.41515`
+is a more honest citation than a version number with no bundle attached.
 
 ## Extract
 
@@ -41,16 +60,16 @@ Extraction copies out; it does not touch the bundle.
 
 ```bash
 rm -rf /tmp/codex-read && mkdir -p /tmp/codex-read
-npx -y asar extract /Applications/Codex.app/Contents/Resources/app.asar /tmp/codex-read/app
+npx -y asar extract "$APP/Contents/Resources/app.asar" /tmp/codex-read/app
 ```
 
 The layers worth knowing:
 
 | Path | Holds |
 | --- | --- |
-| `/Applications/Codex.app/Contents/Resources/app.asar` | packed JavaScript |
-| `.../Resources/app.asar.unpacked` | native modules and files that must stay on disk |
-| `/Applications/Codex.app/Contents/Info.plist` | version, ASAR integrity hashes |
+| `$APP/Contents/Resources/app.asar` | packed JavaScript |
+| `$APP/Contents/Resources/app.asar.unpacked` | native modules and files that must stay on disk |
+| `$APP/Contents/Info.plist` | version, ASAR integrity hashes |
 | `~/.codex/config.toml` | local config, including `[features]` |
 | `~/.codex/` | local persisted state |
 

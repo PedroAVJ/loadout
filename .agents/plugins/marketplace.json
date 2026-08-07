@@ -17,18 +17,6 @@
       "category": "Productivity"
     },
     {
-      "name": "oracle",
-      "source": {
-        "source": "local",
-        "path": "./plugins/oracle"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
       "name": "gmail-cli",
       "source": {
         "source": "local",
@@ -149,10 +137,10 @@
       "category": "Productivity"
     },
     {
-      "name": "codex-app",
+      "name": "codex",
       "source": {
         "source": "local",
-        "path": "./plugins/codex-app"
+        "path": "./plugins/codex"
       },
       "policy": {
         "installation": "AVAILABLE",
