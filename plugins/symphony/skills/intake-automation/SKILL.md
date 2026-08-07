@@ -1,6 +1,6 @@
 ---
 name: intake-automation
-description: "Rules for unattended intake automations — scheduled/heartbeat watchers over Gmail, WhatsApp, Voice Memos, calendars, or any inbox. Use when writing, auditing, or running a Codex automation prompt, when a heartbeat is deciding whether to spawn a worker, and when a spawned worker has to decide what 'done' means without Pedro watching."
+description: "Rules for unattended intake automations — scheduled/heartbeat watchers over Gmail, WhatsApp, Voice Memos, calendars, or any inbox. Use when writing, auditing, or running a Codex automation prompt, when a heartbeat is deciding whether to spawn a worker, when a worker is deciding which lane a batch routes to (elicitation evidence, defect report, notify, ignore), and when a spawned worker has to decide what 'done' means without Pedro watching."
 ---
 
 # Symphony Intake Automation
@@ -28,6 +28,45 @@ A watcher that starts doing the work is the most common failure. It is running
 at low effort on a schedule with no supervision — exactly the wrong shape for
 judgment. If the watcher finds itself reading a full transcript or opening
 source files, it should have spawned instead.
+
+## Where A Batch Routes
+
+Watchers are source-shaped: Gmail, WhatsApp, Voice Memos, call recordings, an
+alerting integration. Lanes are destination-shaped and source-agnostic. Keep
+them separate — a watcher that carries a lane's steps is a router with the
+pipeline welded into it, and the same pipeline then has to be maintained in
+every automation prompt that touches it.
+
+**The worker picks the lane, not the watcher.** Routing usually needs the
+content, and the watcher only has metadata: whether a voice memo is a work
+requirement or a grocery list is not visible from its duration. So the watcher
+spawns on arrival, and the worker classifies once it has something to read.
+
+The lanes:
+
+- **Elicitation evidence** — a meeting recording, a work call, a work voice
+  memo, a stakeholder thread: anything where someone stated what they need.
+  Run `elicitation` to freeze the evidence, then `analysis`, which classifies
+  the requirements and creates them as Linear Backlog issues. All three audio
+  sources converge here; by the time analysis runs it is a transcript with
+  attribution either way, and nothing downstream cares which app produced it.
+- **Defect report** — a crash, an alert, a broken behavior someone hit. This is
+  not a requirement and does not get an analysis pass: a stack trace is already
+  unambiguous and verifiable, which is the whole point of analysis. It goes to
+  Linear **Triage**, where the verdict is keep, duplicate, or decline.
+  Integration-created issues (Sentry, Slack) land in Triage on their own.
+- **Notify** — Pedro must know or decide something, and no lane owns it yet.
+- **Ignore** — everything else. Silent, recorded in the cursor, no task.
+
+The distinction between the first two lanes is what verdict the arrival needs.
+A defect asks *is this real* — one decision, and Triage exists to take it. A
+meeting asks *what is this actually demanding*, which is a classification
+problem, and no inbox answers it. That is why one gets adjudicated and the other
+gets analyzed.
+
+When the lane is genuinely unclear after reading the content, preserve the
+evidence, mark it pending, and say so in the final report. Do not force an
+arrival into a lane to avoid ending on an open question.
 
 ## Escalate The Model Explicitly
 
@@ -178,13 +217,16 @@ Then output one terse line naming the spawned worker and the item count.
 When reviewing an `automation.toml` or a running automation, check in order:
 
 1. Does the watcher spawn, or is it doing the work itself?
-2. Is a model/effort set, on the automation and on the spawn?
-3. Local or worktree — and does that match the number of repos in scope?
-4. Does the prompt say what landing means, and does it contradict itself
+2. Does the prompt name a lane, or restate a lane's steps inline? A worker
+   prompt that spells out a pipeline this skill already owns will drift out of
+   sync with it.
+3. Is a model/effort set, on the automation and on the spawn?
+4. Local or worktree — and does that match the number of repos in scope?
+5. Does the prompt say what landing means, and does it contradict itself
    (a "do not push" clause under a task that produces repo content)?
-5. Is the outbound boundary explicit?
-6. Is the cursor keyed on source-native IDs and persisted outside the thread?
-7. Does it stay silent on an empty run?
+6. Is the outbound boundary explicit?
+7. Is the cursor keyed on source-native IDs and persisted outside the thread?
+8. Does it stay silent on an empty run?
 
 Report contradictions plainly. A prompt that says "route this to the correct
 work repository" and also says "do not commit or push" has specified a dead end,
