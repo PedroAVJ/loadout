@@ -57,11 +57,13 @@ Instrumental is necessary and **not sufficient**. All three must hold:
    that passes the first two, and it is the one that gets missed.
 
 Familiarity helps: known music becomes texture, novel music recruits
-attention. Criterion 2 outranks criterion 3 in practice: a quiet cue from
-beloved source material can sit in a pool fine, while a swelling one from the
-same composer breaks it. When a track is rejected, ask *which* criterion it
-broke — the answer sharpens the next batch far more than the rejection does. Two failure modes to watch — a beloved track can be *too*
+attention. Two failure modes to watch — a beloved track can be *too*
 engaging, and a queue that ends hands the session to autoplay.
+
+Criterion 2 outranks criterion 3 in practice: a quiet cue from beloved source
+material can sit in a pool fine, while a swelling one by the same composer
+breaks it. So when a track is rejected, ask *which* criterion it broke — the
+answer sharpens the next batch far more than the rejection itself does.
 
 ## The Audition Funnel
 
