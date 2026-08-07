@@ -57,6 +57,12 @@ extracting requirements and then letting another agent implement them.
 
 Use the narrower Symphony skills when the request names a lane:
 
+- `intake-automation`: the rules for unattended scheduled/heartbeat watchers —
+  watcher spawns worker, escalate the model explicitly on spawn, choose worktree
+  versus main checkout by repo count, land code work with a branch/push/PR, keep
+  outbound sends gated at a draft, and stay silent on an empty run. Use it when
+  writing or auditing an automation prompt, and when a spawned worker must
+  decide what "done" means with nobody watching.
 - `elicitation`: capture elicitation sessions — meetings, calls, voice memos,
   transcripts, Drive/Gmail artifacts, and local media — as durable evidence
   before extraction.

@@ -2,6 +2,38 @@
 
 Local Codex plugin for Pedro's explicit Symphony meta-workflow loops.
 
+## Where The Name Comes From
+
+[Symphony](https://github.com/openai/symphony) is OpenAI's open-source spec for
+Codex orchestration, published February 2026 under Apache-2.0 with an Elixir
+reference implementation. It "turns project work into isolated, autonomous
+implementation runs, allowing teams to manage work instead of supervising coding
+agents": a daemon polls a tracker such as Linear, claims eligible issues, gives
+each one a per-issue workspace, launches a coding agent against it, and tracks
+the run to a handoff state. Workflow policy lives in-repo in `WORKFLOW.md` so the
+agent prompt and runtime settings are versioned with the code. `SPEC.md` is the
+normative document; OpenAI states it does not intend to maintain Symphony as a
+product, and expects forks and reimplementations.
+
+This plugin is Pedro's reimplementation of that thesis at N=1, and it keeps the
+principles rather than the Elixir:
+
+- **Manage the work, not the agent.** Pedro reviews packets and results, not
+  agent turns.
+- **Isolate every run.** Fresh threads and worktrees per unit of work, so runs
+  never contend over one checkout.
+- **Keep the policy in the repo.** Skills and `AGENTS.md` are versioned
+  alongside the code they govern, the same role `WORKFLOW.md` plays upstream.
+- **Prove the work landed.** Runs end at merge/release proof or an explicitly
+  named handoff state, never at "the agent said it was done."
+
+The differences are deliberate. Upstream Symphony is a continuously polling
+daemon over a whole board; this plugin runs only when Pedro invokes a lane, plus
+the scheduled intake watchers governed by `intake-automation`. The parts of the
+lifecycle upstream leaves implementation-defined — branch and PR policy, release
+proof, tracker reconciliation — are exactly what `merge`, `azure-merge`, and
+`codex-review` pin down here.
+
 Codex owns stewardship: grounding, source boundaries, issue lifecycle judgment,
 and final reporting. Symphony owns repeatable workflow shape. Claude may be
 invoked as a collaborator for design, HTML, presentation, or UI implementation
@@ -28,6 +60,8 @@ passes, but Claude should not become the source of truth for work status.
   and repo state.
 - Surface concise completion/status updates to Pedro after the workflow has
   actually finished.
+- Govern unattended intake automations: a cheap watcher spawns a capable worker,
+  the worker lands its code, and outbound side effects stay gated.
 
 ## Repo-Specific Boundary
 
@@ -44,6 +78,7 @@ HTML, a deliberately scoped intake audit, or a status summary.
 ## Skills
 
 - `symphony`
+- `intake-automation`
 - `elicitation`
 - `analysis`
 - `requirements-elicitation`
@@ -63,6 +98,13 @@ HTML, a deliberately scoped intake audit, or a status summary.
 - `azure-merge`
 - `linear` (workspace-wide issue conventions)
 - `bdd-test` (behavior contracts paired with Playwright automation)
+
+`intake-automation` is the unattended edge: the rules a scheduled Codex
+automation follows when it wakes on a heartbeat with nobody watching — watcher
+versus worker tiers, explicit model escalation on spawn, worktree choice, the
+requirement that code work actually gets pushed, and the hard boundary at
+outbound sends. It governs the automation prompt; the work the spawned worker
+does still runs through the ordinary lanes below.
 
 The last two are standing conventions rather than lifecycle steps. `linear`
 governs every issue in the workspace however it was created — no priorities,
