@@ -41,6 +41,11 @@ if [[ -n "${page_size:-}" && -n "${free_pages:-}" ]]; then
 fi
 uptime
 
+section "Disk Headroom (Swap Ceiling)"
+df -h /System/Volumes/Data /System/Volumes/VM 2>/dev/null || true
+diskutil apfs list 2>/dev/null | grep -E "Capacity (In Use|Not Allocated)" || true
+tmutil listlocalsnapshots / 2>/dev/null || true
+
 section "App Family Totals"
 ps -axo pcpu=,pmem=,rss=,args= | awk '
 {

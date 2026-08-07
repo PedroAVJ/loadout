@@ -71,6 +71,40 @@ Practical risk bands for this user's 8 GB Mac:
 
 When RAM looks bad, list the largest RSS app families and large sleeping processes. On this machine, Electron/browser apps add up quickly: Codex, Claude Desktop, ChatGPT Atlas, and browser/video tabs.
 
+## Interpret Disk Headroom As The Swap Ceiling
+
+Swap files live on the same APFS container as everything else, so container
+free space is the hard ceiling on how far swap can grow. Reported "available"
+disk already deducts current swap files; the risk is that swap needs to grow
+*into* the remaining free space. On an 8 GB machine, low disk therefore
+directly lowers the OOM threshold.
+
+Check:
+
+```bash
+df -h /System/Volumes/Data /System/Volumes/VM
+diskutil apfs list | grep -E "Capacity (In Use|Not Allocated)"
+tmutil listlocalsnapshots /
+```
+
+Practical bands for this user's 245 GB disk:
+
+- Free `50 GB+`: healthy; swap can absorb a bad day without disk pressure.
+- Free `25-50 GB`: acceptable; mention it only if swap is also elevated.
+- Free `10-25 GB`: pressured; a heavy agent day can push swap into the
+  ceiling. Flag it and suggest a cleanup pass.
+- Free under `10 GB`: critical; swap exhaustion is imminent under load and
+  APFS itself degrades (slow writes, failed updates). Treat as actionable
+  even if the machine currently feels fine.
+
+Notes:
+
+- Observed 2026-08-03: swap maxed at 9.2 GB while container free space was
+  ~11 GB — the swap ceiling was disk-imposed, and thrashing followed.
+- `sleepimage` (~2 GB, hibernation) is a fixed cost on the VM volume.
+- Local Time Machine snapshots can hold space invisibly; list them before
+  blaming apps.
+
 ## Agent-Specific Leak And Accumulation Signals
 
 ### Computer Use
