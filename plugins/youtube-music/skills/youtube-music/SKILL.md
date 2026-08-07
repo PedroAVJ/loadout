@@ -78,6 +78,30 @@ grabbing track arrives mid-session and looks like a curation failure. Either
 end the queue with a long compilation, tell the user to switch autoplay off,
 or accept it and warn them.
 
+**Temp queues are a youtube.com mechanism.** A user who listens on YouTube
+Music — especially on a phone, where a session URL is useless — needs
+candidates in a real playlist instead. Make a second, explicitly provisional
+playlist rather than polluting the good one; 50 units per track is cheap
+next to handing someone a link their phone cannot open.
+
+## Free Expansion Candidates
+
+A playlist page on `music.youtube.com` carries a **Suggestions** rail
+underneath it, seeded from the playlist's own contents. It costs no quota
+and reflects the user's actual curation rather than a generic mood. Read it
+before spending 100 units on `ytx search`.
+
+For continuous play beyond a finite pool, playlist radio extends any
+playlist indefinitely:
+
+```text
+https://music.youtube.com/playlist?list=RDAMPL<PLAYLIST_ID>
+```
+
+This is recommendation conditioned on validated seeds — usually a better
+answer to "I want new music constantly" than hand-picking, and the reason a
+short pool is not a problem.
+
 ## Opening Playback
 
 Open playback in the **user's own browser**, not an agent-controlled or
