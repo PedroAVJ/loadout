@@ -29,6 +29,37 @@ current directory). Pass `-g` for user-level config. Get the scope right
 before running anything — a project-scope install in the wrong directory
 leaves stray config files behind.
 
+## Two Ways to Attach an MCP Server
+
+The same MCP server can be attached in two different ways, and only one of
+them is `add-mcp`'s business. The difference is **who acts as the MCP
+client**, not what the server is.
+
+**Locally configured** — the agent on this machine is the client. The
+definition is a URL or command in the agent's own config, and any OAuth
+token lands locally. Portable: the same recipe works in every agent. This is
+what `add-mcp` manages. In Codex these are `[mcp_servers.*]` in
+`~/.codex/config.toml`; in Claude Code, `claude mcp add` scopes.
+
+**Vendor-brokered** — the vendor's cloud is the client. You register the
+server in your *account*, the vendor's infrastructure connects out to it and
+holds the OAuth grant, and nothing lands on disk. Not portable, by design.
+Anthropic calls these **connectors** (from the Connectors Directory, or
+**custom connectors** when you supply the URL yourself). OpenAI calls the
+equivalent **apps** — `[apps.*]` in `config.toml`, an opaque ID and an
+enabled flag, no URL or credential.
+
+The trap: "custom connector" describes *who chose the server*, not *who
+brokers it*. Pasting `https://mcp.linear.app/mcp` into Claude's connector
+settings and running `add-mcp https://mcp.linear.app/mcp -a claude-code`
+point at the identical server, but the first is vendor-brokered and the
+second is local. Registering one does not create the other.
+
+Practical consequence when auditing: a vendor-brokered integration will
+never appear in `add-mcp list`, and that is correct rather than broken.
+Never read an empty `list` as "this agent has no MCP tools" — it means "no
+locally configured servers." Check the agent's actual tool list too.
+
 ## Find a Server
 
 Search the integrations.sh registry. Omit the keyword to browse.
@@ -84,11 +115,8 @@ Prints every detected agent and its configured servers. Run this before
 adding anything — the same server is often already installed under a
 different name in another agent.
 
-**Claude Code caveat:** `list` reads the CLI-level config (`~/.claude.json`).
-MCP connectors configured through the Claude Code desktop app live in a
-separate store and do **not** appear here. "Claude Code: no servers
-configured" therefore does not mean the running agent has no MCP tools.
-Check the actual tool list before concluding a server is missing.
+`list` only sees locally configured servers — see "Two Ways to Attach an MCP
+Server" above before concluding an agent is empty.
 
 ## Remove a Server
 
