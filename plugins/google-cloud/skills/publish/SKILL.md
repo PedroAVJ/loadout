@@ -39,8 +39,14 @@ JSON.
 publish-file --json doctor
 ```
 
-Resolve `bin/publish-file.mjs` relative to the plugin root — from this skill
-file that is `../../bin/publish-file.mjs`. Config resolves in order:
+Resolve `bin/publish-file` relative to the plugin root — from this skill file
+that is `../../bin/publish-file`. Use that shim rather than the `.mjs` beside
+it: plugin marketplaces copy source into a cache without running an
+installer, so the shim installs the CLI's dependencies on first run. Invoking
+the `.mjs` directly from a fresh install fails with `Cannot find package
+'@google-cloud/storage'`.
+
+Config resolves in order:
 `GCP_PROJECT_ID` / `GCS_PUBLIC_BUCKET` / `GCS_PRIVATE_BUCKET` from the
 environment or `--env-file`, then `~/.publish-file/config.json`, then
 built-in defaults pointing at `pedro-app-storage-20260801`.

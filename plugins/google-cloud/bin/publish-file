@@ -1,0 +1,50 @@
+#!/bin/sh
+# Entry point for the publish-file CLI.
+#
+# Plugin marketplaces copy plugin source into a cache directory without ever
+# running an installer, so a Node CLI with dependencies arrives with no
+# node_modules and dies on first import. This shim resolves the plugin root
+# through any symlinks, installs production dependencies once if they are
+# missing, then execs the real CLI.
+set -eu
+
+script="$0"
+while [ -L "$script" ]; do
+  dir="$(CDPATH= cd -- "$(dirname -- "$script")" && pwd)"
+  link="$(readlink "$script")"
+  case "$link" in
+    /*) script="$link" ;;
+    *) script="$dir/$link" ;;
+  esac
+done
+
+plugin_root="$(CDPATH= cd -- "$(dirname -- "$script")/.." && pwd)"
+entry="$plugin_root/bin/publish-file.mjs"
+
+if [ ! -f "$entry" ]; then
+  echo "publish-file: CLI not found at $entry" >&2
+  exit 1
+fi
+
+# node_modules may live in the plugin itself or be hoisted to a workspace root.
+if [ ! -d "$plugin_root/node_modules/@google-cloud/storage" ] \
+  && [ ! -d "$plugin_root/../../node_modules/@google-cloud/storage" ]; then
+  if command -v pnpm >/dev/null 2>&1; then
+    installer="pnpm install --prod --dir $plugin_root"
+  elif command -v npm >/dev/null 2>&1; then
+    installer="npm install --omit=dev --prefix $plugin_root"
+  else
+    echo "publish-file: dependencies are missing and neither pnpm nor npm is on PATH." >&2
+    echo "publish-file: install them manually in $plugin_root" >&2
+    exit 1
+  fi
+  echo "publish-file: installing dependencies in $plugin_root (first run)…" >&2
+  # shellcheck disable=SC2086
+  if ! $installer >/dev/null 2>&1; then
+    echo "publish-file: dependency install failed. Run it manually:" >&2
+    echo "  $installer" >&2
+    exit 1
+  fi
+fi
+
+exec node "$entry" "$@"

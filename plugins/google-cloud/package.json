@@ -1,11 +1,11 @@
 {
   "name": "@loadout/google-cloud",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "Google Cloud plugin: gcloud conventions, Cloud Storage substrate, and the publish-file CLI.",
   "bin": {
-    "publish-file": "./bin/publish-file.mjs"
+    "publish-file": "./bin/publish-file"
   },
   "scripts": {
     "check": "node --check bin/publish-file.mjs && node --test ./tests",

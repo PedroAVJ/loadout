@@ -43,8 +43,12 @@ and `etag`. It uses Application Default Credentials.
 
 ```bash
 gcloud auth application-default login
-./bin/publish-file.mjs --json doctor
+./bin/publish-file --json doctor
 ```
+
+Call `bin/publish-file`, not the `.mjs` beside it. Marketplaces copy plugin
+source into a cache without running an installer, so the shim installs
+production dependencies on first run and then execs the CLI.
 
 ```bash
 pnpm --dir plugins/google-cloud test
