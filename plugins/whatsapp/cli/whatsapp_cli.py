@@ -819,6 +819,20 @@ def open_transcripts_db() -> sqlite3.Connection:
         ON media_transcripts (chat_jid, updated_at DESC)
         """
     )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS media_transcript_failures (
+            message_id TEXT NOT NULL,
+            chat_jid TEXT NOT NULL,
+            attempts INTEGER NOT NULL DEFAULT 1,
+            last_code TEXT,
+            last_error TEXT,
+            first_attempt_at TEXT NOT NULL,
+            last_attempt_at TEXT NOT NULL,
+            PRIMARY KEY (message_id, chat_jid)
+        )
+        """
+    )
     conn.commit()
     return conn
 
@@ -1134,17 +1148,34 @@ def resolve_messages_db_path() -> Path:
     return path
 
 
-def pending_audio_messages(*, chat_jid: str | None, since: str | None, limit: int) -> tuple[list[dict[str, Any]], int]:
+MAX_TRANSCRIBE_ATTEMPTS = 3
+
+
+def pending_audio_messages(
+    *, chat_jid: str | None, since: str | None, limit: int, retry_failed: bool = False
+) -> tuple[list[dict[str, Any]], int, int]:
     """Audio messages in the bridge store that have no cached transcript yet.
 
     Pending means no transcript row exists for the message at all, whatever
     options produced it. Backfill never re-spends on an already transcribed
     message; `media transcribe --refresh` remains the way to redo one.
+
+    Messages that have failed `MAX_TRANSCRIBE_ATTEMPTS` times are treated as
+    permanently unavailable and drop out of the queue. WhatsApp expires media
+    from its CDN after a couple of weeks, so without this an unattended drain
+    retries the same dead messages on every run, forever.
     """
     transcribed: set[tuple[str, str]] = set()
+    exhausted: set[tuple[str, str]] = set()
     with open_transcripts_db() as conn:
         for row in conn.execute("SELECT message_id, chat_jid FROM media_transcripts"):
             transcribed.add((row["message_id"], row["chat_jid"]))
+        if not retry_failed:
+            for row in conn.execute(
+                "SELECT message_id, chat_jid FROM media_transcript_failures WHERE attempts >= ?",
+                (MAX_TRANSCRIBE_ATTEMPTS,),
+            ):
+                exhausted.add((row["message_id"], row["chat_jid"]))
 
     audio_types = sorted(AUDIO_MEDIA_TYPES)
     clauses = ["LOWER(COALESCE(media_type, '')) IN ({})".format(",".join("?" for _ in audio_types))]
@@ -1177,18 +1208,46 @@ def pending_audio_messages(*, chat_jid: str | None, since: str | None, limit: in
         }
         for row in rows
         if (row["id"], row["chat_jid"]) not in transcribed
+        and (row["id"], row["chat_jid"]) not in exhausted
     ]
-    return pending[:limit], len(pending)
+    return pending[:limit], len(pending), len(exhausted)
+
+
+def record_transcribe_failure(message_id: str, chat_jid: str, code: str, error: str) -> int:
+    now = utc_now()
+    with open_transcripts_db() as conn:
+        conn.execute(
+            """
+            INSERT INTO media_transcript_failures (
+                message_id, chat_jid, attempts, last_code, last_error, first_attempt_at, last_attempt_at
+            ) VALUES (?, ?, 1, ?, ?, ?, ?)
+            ON CONFLICT(message_id, chat_jid) DO UPDATE SET
+                attempts = attempts + 1,
+                last_code = excluded.last_code,
+                last_error = excluded.last_error,
+                last_attempt_at = excluded.last_attempt_at
+            """,
+            (message_id, chat_jid, code, error[:2000], now, now),
+        )
+        conn.commit()
+        row = conn.execute(
+            "SELECT attempts FROM media_transcript_failures WHERE message_id = ? AND chat_jid = ?",
+            (message_id, chat_jid),
+        ).fetchone()
+    return row["attempts"] if row else 1
 
 
 def command_media_transcribe_pending(args: argparse.Namespace) -> dict[str, Any]:
     if args.limit < 1:
         raise CliError("media transcribe-pending --limit must be greater than zero.", code="invalid_limit")
 
-    pending, pending_total = pending_audio_messages(chat_jid=args.chat_jid, since=args.since, limit=args.limit)
+    pending, pending_total, gave_up = pending_audio_messages(
+        chat_jid=args.chat_jid, since=args.since, limit=args.limit, retry_failed=args.retry_failed
+    )
     result: dict[str, Any] = {
         "pending_total": pending_total,
         "selected": len(pending),
+        "gave_up": gave_up,
         "transcripts_db_path": str(transcripts_db_path()),
     }
     if args.dry_run:
@@ -1216,7 +1275,16 @@ def command_media_transcribe_pending(args: argparse.Namespace) -> dict[str, Any]
         try:
             outcome = command_media_transcribe(call_args)
         except CliError as exc:
-            failed.append({**item, "error": str(exc), "code": exc.code})
+            attempts = record_transcribe_failure(item["message_id"], item["chat_jid"], exc.code, str(exc))
+            failed.append(
+                {
+                    **item,
+                    "error": str(exc),
+                    "code": exc.code,
+                    "attempts": attempts,
+                    "gave_up": attempts >= MAX_TRANSCRIBE_ATTEMPTS,
+                }
+            )
             if args.stop_on_error:
                 break
             continue
@@ -1329,6 +1397,10 @@ def command_media_autotranscribe_status(args: argparse.Namespace) -> dict[str, A
     log_path = autotranscribe_log_path()
     with open_transcripts_db() as conn:
         cached = conn.execute("SELECT COUNT(*) FROM media_transcripts").fetchone()[0]
+        gave_up = conn.execute(
+            "SELECT COUNT(*) FROM media_transcript_failures WHERE attempts >= ?",
+            (MAX_TRANSCRIBE_ATTEMPTS,),
+        ).fetchone()[0]
     return {
         "label": AUTOTRANSCRIBE_LABEL,
         "installed": plist_path.exists(),
@@ -1336,6 +1408,7 @@ def command_media_autotranscribe_status(args: argparse.Namespace) -> dict[str, A
         "plist_path": str(plist_path),
         "log_path": str(log_path) if log_path.exists() else None,
         "cached_transcripts": cached,
+        "gave_up": gave_up,
         "launchctl": listing.stdout.strip()[-2000:] if listing.returncode == 0 else None,
     }
 
@@ -1969,6 +2042,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--stop-on-error",
         action="store_true",
         help="Stop at the first failure instead of continuing through the batch.",
+    )
+    media_transcribe_pending.add_argument(
+        "--retry-failed",
+        action="store_true",
+        help=(
+            "Include messages already given up on after repeated failures. "
+            "Media expired from WhatsApp's CDN never becomes available again."
+        ),
     )
     media_transcribe_pending.add_argument("--language", help="Optional language hint such as 'es'.")
     media_transcribe_pending.add_argument("--model", default="scribe_v2")

@@ -214,6 +214,24 @@ test("pending transcription drains on a schedule without an agent deciding", () 
   assert.match(readme, /expires media from\s+its CDN/i);
 });
 
+test("permanently unavailable audio leaves the queue instead of retrying forever", () => {
+  const cli = fs.readFileSync(path.join(pluginRoot, "cli", "whatsapp_cli.py"), "utf8");
+  const readme = fs.readFileSync(path.join(pluginRoot, "README.md"), "utf8");
+
+  // Failures are durable and counted, not just logged.
+  assert.match(cli, /CREATE TABLE IF NOT EXISTS media_transcript_failures/);
+  assert.match(cli, /def record_transcribe_failure/);
+  assert.match(cli, /MAX_TRANSCRIBE_ATTEMPTS = \d+/);
+
+  // Exhausted messages are excluded from the pending queue by default,
+  // so an unattended drain does not rediscover expired media every run.
+  assert.match(cli, /FROM media_transcript_failures WHERE attempts >= \?/);
+  assert.match(cli, /not in exhausted/);
+  assert.match(cli, /"--retry-failed"/);
+
+  assert.match(readme, /--retry-failed/);
+});
+
 test("list_messages returns structured reply metadata", () => {
   const mcpServerDir = path.join(
     pluginRoot,

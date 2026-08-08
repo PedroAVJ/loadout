@@ -130,6 +130,12 @@ its CDN after roughly two to three weeks. Audio that is not transcribed inside
 that window cannot be recovered, so leaving the decision to whoever happens to
 read the chat loses data permanently.
 
+Because expired media never comes back, failures are durable rather than
+retried forever: a message that fails three times drops out of the pending
+queue and is reported as `gave_up`. Pass `--retry-failed` to include those
+again after fixing an unrelated cause, such as a stopped bridge or a missing
+`ELEVENLABS_API_KEY`.
+
 Transcription uses the sibling ElevenLabs plugin helper and requires
 `ELEVENLABS_API_KEY` only on cache misses. The LaunchAgent runs through a login
 shell so it picks that key up from the user's profile rather than storing a
