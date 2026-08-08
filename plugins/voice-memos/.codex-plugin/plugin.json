@@ -1,7 +1,7 @@
 {
   "name": "voice-memos",
-  "version": "0.1.0",
-  "description": "Read the macOS Voice Memos store from Codex.",
+  "version": "0.2.0",
+  "description": "Read the macOS Voice Memos store and coordinate durable intake batches from Codex.",
   "author": {
     "name": "PedroAVJ",
     "url": "https://github.com/PedroAVJ"
@@ -19,8 +19,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Voice Memos",
-    "shortDescription": "Read the macOS Voice Memos store",
-    "longDescription": "Enumerate Apple Voice Memos recordings with correct metadata by reading the Core Data store directly, resolve recordings to audio paths, and extract Apple's on-device transcripts when present.",
+    "shortDescription": "Read and deduplicate Voice Memos intake",
+    "longDescription": "Enumerate Apple Voice Memos recordings with correct metadata, atomically claim new recordings by UUID for an intake worker, resolve audio paths, and extract Apple's on-device transcripts when present.",
     "developerName": "PedroAVJ",
     "category": "Productivity",
     "capabilities": [

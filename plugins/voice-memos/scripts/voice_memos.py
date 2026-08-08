@@ -26,18 +26,26 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import re
 import shutil
 import sqlite3
 import struct
 import sys
 import tempfile
+import uuid
 from pathlib import Path
 
 RECORDINGS = Path.home() / (
     "Library/Group Containers/group.com.apple.VoiceMemos.shared/Recordings"
 )
 DB = RECORDINGS / "CloudRecordings.db"
+STATE_DB = Path(
+    os.environ.get(
+        "VOICE_MEMOS_STATE_DB",
+        Path.home() / "Library/Application Support/voice-memos/intake.sqlite3",
+    )
+)
 
 # Core Data reference date (2001-01-01T00:00:00Z) expressed as a Unix timestamp.
 CORE_DATA_EPOCH = 978_307_200
@@ -51,6 +59,10 @@ _AUTO_LABEL = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z?$")
 
 
 class VoiceMemosError(RuntimeError):
+    pass
+
+
+class IntakeError(VoiceMemosError):
     pass
 
 
@@ -122,6 +134,216 @@ def resolve(ref: str) -> dict:
         if r["uuid"].startswith(ref.upper()):
             return r
     raise VoiceMemosError(f"no recording matches {ref!r}")
+
+
+def _state_connection() -> sqlite3.Connection:
+    """Open the plugin-owned intake database and apply its small schema."""
+    STATE_DB.parent.mkdir(parents=True, exist_ok=True)
+    con = sqlite3.connect(STATE_DB, timeout=10, isolation_level=None)
+    con.row_factory = sqlite3.Row
+    con.execute("PRAGMA journal_mode=WAL")
+    con.execute("PRAGMA foreign_keys=ON")
+    con.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS intake_batches (
+            id TEXT PRIMARY KEY,
+            state TEXT NOT NULL CHECK (state IN ('claimed', 'dispatched', 'released')),
+            created_at TEXT NOT NULL,
+            task_id TEXT,
+            dispatched_at TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS intake_items (
+            uuid TEXT PRIMARY KEY,
+            filename TEXT NOT NULL,
+            recorded_at TEXT NOT NULL,
+            batch_id TEXT,
+            state TEXT NOT NULL CHECK (state IN ('ready', 'claimed', 'dispatched', 'completed', 'pending', 'baseline')),
+            claimed_at TEXT,
+            resolved_at TEXT,
+            destination TEXT,
+            note TEXT,
+            FOREIGN KEY (batch_id) REFERENCES intake_batches(id)
+        );
+
+        CREATE INDEX IF NOT EXISTS intake_items_batch_id ON intake_items(batch_id);
+        """
+    )
+    return con
+
+
+def _now() -> str:
+    return dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
+
+
+def intake_claim() -> dict:
+    """Atomically claim every previously unseen recording for one worker batch."""
+    records = read_recordings()
+    now = _now()
+    batch_id = str(uuid.uuid4())
+    claimed: list[dict] = []
+    con = _state_connection()
+    try:
+        con.execute("BEGIN IMMEDIATE")
+        con.execute(
+            "INSERT INTO intake_batches (id, state, created_at) VALUES (?, 'claimed', ?)",
+            (batch_id, now),
+        )
+        for record in records:
+            existing = con.execute(
+                "SELECT state FROM intake_items WHERE uuid = ?", (record["uuid"],)
+            ).fetchone()
+            if existing is None:
+                con.execute(
+                    """
+                    INSERT INTO intake_items
+                        (uuid, filename, recorded_at, batch_id, state, claimed_at)
+                    VALUES (?, ?, ?, ?, 'claimed', ?)
+                    """,
+                    (record["uuid"], record["filename"], record["recorded_at"], batch_id, now),
+                )
+            elif existing["state"] == "ready":
+                con.execute(
+                    "UPDATE intake_items SET batch_id = ?, state = 'claimed', claimed_at = ? WHERE uuid = ?",
+                    (batch_id, now, record["uuid"]),
+                )
+            else:
+                continue
+            claimed.append(record)
+        if not claimed:
+            con.execute("DELETE FROM intake_batches WHERE id = ?", (batch_id,))
+        con.execute("COMMIT")
+    except Exception:
+        con.execute("ROLLBACK")
+        raise
+    finally:
+        con.close()
+
+    return {"batch_id": batch_id if claimed else None, "count": len(claimed), "memos": claimed}
+
+
+def intake_baseline() -> dict:
+    """Record the current store as already seen before enabling intake."""
+    records = read_recordings()
+    now = _now()
+    con = _state_connection()
+    try:
+        con.execute("BEGIN IMMEDIATE")
+        existing = con.execute("SELECT COUNT(*) FROM intake_items").fetchone()[0]
+        if existing:
+            raise IntakeError(
+                "intake state already exists; refusing to replace its cursor with a baseline"
+            )
+        for record in records:
+            con.execute(
+                """
+                INSERT INTO intake_items
+                    (uuid, filename, recorded_at, state, resolved_at, note)
+                VALUES (?, ?, ?, 'baseline', ?, 'Initial store baseline')
+                """,
+                (record["uuid"], record["filename"], record["recorded_at"], now),
+            )
+        con.execute("COMMIT")
+    except Exception:
+        con.execute("ROLLBACK")
+        raise
+    finally:
+        con.close()
+    return {"count": len(records), "state": "baseline"}
+
+
+def intake_attach(batch_id: str, task_id: str) -> dict:
+    """Record the task that owns an already claimed batch."""
+    now = _now()
+    con = _state_connection()
+    try:
+        con.execute("BEGIN IMMEDIATE")
+        batch = con.execute("SELECT state FROM intake_batches WHERE id = ?", (batch_id,)).fetchone()
+        if batch is None:
+            raise IntakeError(f"unknown intake batch {batch_id}")
+        if batch["state"] != "claimed":
+            raise IntakeError(f"intake batch {batch_id} is already {batch['state']}")
+        con.execute(
+            "UPDATE intake_batches SET state = 'dispatched', task_id = ?, dispatched_at = ? WHERE id = ?",
+            (task_id, now, batch_id),
+        )
+        changed = con.execute(
+            "UPDATE intake_items SET state = 'dispatched' WHERE batch_id = ? AND state = 'claimed'",
+            (batch_id,),
+        ).rowcount
+        con.execute("COMMIT")
+    except Exception:
+        con.execute("ROLLBACK")
+        raise
+    finally:
+        con.close()
+    return {"batch_id": batch_id, "task_id": task_id, "count": changed}
+
+
+def intake_release(batch_id: str) -> dict:
+    """Return a claim to the ready queue when task creation did not happen."""
+    con = _state_connection()
+    try:
+        con.execute("BEGIN IMMEDIATE")
+        batch = con.execute("SELECT state FROM intake_batches WHERE id = ?", (batch_id,)).fetchone()
+        if batch is None:
+            raise IntakeError(f"unknown intake batch {batch_id}")
+        if batch["state"] != "claimed":
+            raise IntakeError(f"only an un-dispatched batch can be released; {batch_id} is {batch['state']}")
+        changed = con.execute(
+            "UPDATE intake_items SET state = 'ready', batch_id = NULL, claimed_at = NULL WHERE batch_id = ? AND state = 'claimed'",
+            (batch_id,),
+        ).rowcount
+        con.execute("UPDATE intake_batches SET state = 'released' WHERE id = ?", (batch_id,))
+        con.execute("COMMIT")
+    except Exception:
+        con.execute("ROLLBACK")
+        raise
+    finally:
+        con.close()
+    return {"batch_id": batch_id, "count": changed}
+
+
+def intake_resolve(recording: str, state: str, destination: str | None, note: str | None) -> dict:
+    """Finish an item after a worker has made the content-based routing decision."""
+    record = resolve(recording)
+    con = _state_connection()
+    try:
+        con.execute("BEGIN IMMEDIATE")
+        item = con.execute("SELECT state FROM intake_items WHERE uuid = ?", (record["uuid"],)).fetchone()
+        if item is None:
+            raise IntakeError(f"recording {record['uuid']} was never claimed for intake")
+        if item["state"] not in ("claimed", "dispatched"):
+            raise IntakeError(f"recording {record['uuid']} is already {item['state']}")
+        con.execute(
+            "UPDATE intake_items SET state = ?, resolved_at = ?, destination = ?, note = ? WHERE uuid = ?",
+            (state, _now(), destination, note, record["uuid"]),
+        )
+        con.execute("COMMIT")
+    except Exception:
+        con.execute("ROLLBACK")
+        raise
+    finally:
+        con.close()
+    return {"uuid": record["uuid"], "state": state, "destination": destination, "note": note}
+
+
+def intake_status() -> dict:
+    """Return intake state for audit and recovery; it does not inspect memo content."""
+    con = _state_connection()
+    try:
+        rows = con.execute(
+            """
+            SELECT i.uuid, i.filename, i.recorded_at, i.state, i.destination, i.note,
+                   i.batch_id, b.task_id
+            FROM intake_items AS i
+            LEFT JOIN intake_batches AS b ON b.id = i.batch_id
+            ORDER BY i.recorded_at, i.uuid
+            """
+        ).fetchall()
+    finally:
+        con.close()
+    return {"count": len(rows), "items": [dict(row) for row in rows]}
 
 
 def apple_transcript(path: Path) -> dict | None:
@@ -224,6 +446,50 @@ def cmd_path(args: argparse.Namespace) -> int:
     return 0
 
 
+def _print_intake_result(result: dict, as_json: bool) -> None:
+    if as_json:
+        json.dump(result, sys.stdout, indent=2, ensure_ascii=False)
+        sys.stdout.write("\n")
+    else:
+        print(result.get("count", 1))
+
+
+def cmd_intake_claim(args: argparse.Namespace) -> int:
+    _print_intake_result(intake_claim(), args.json)
+    return 0
+
+
+def cmd_intake_baseline(args: argparse.Namespace) -> int:
+    _print_intake_result(intake_baseline(), args.json)
+    return 0
+
+
+def cmd_intake_attach(args: argparse.Namespace) -> int:
+    _print_intake_result(intake_attach(args.batch, args.task), args.json)
+    return 0
+
+
+def cmd_intake_release(args: argparse.Namespace) -> int:
+    _print_intake_result(intake_release(args.batch), args.json)
+    return 0
+
+
+def cmd_intake_resolve(args: argparse.Namespace) -> int:
+    _print_intake_result(intake_resolve(args.recording, args.state, args.destination, args.note), args.json)
+    return 0
+
+
+def cmd_intake_status(args: argparse.Namespace) -> int:
+    result = intake_status()
+    if args.json:
+        json.dump(result, sys.stdout, indent=2, ensure_ascii=False)
+        sys.stdout.write("\n")
+    else:
+        for item in result["items"]:
+            print(f"{item['state']:>10}  {item['uuid']}  {item['filename']}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="voice-memos", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -246,6 +512,40 @@ def main(argv: list[str] | None = None) -> int:
     p_path = sub.add_parser("path", help="print the absolute audio path for a recording")
     p_path.add_argument("recording", help="UUID, filename, or filename stem")
     p_path.set_defaults(func=cmd_path)
+
+    p_intake = sub.add_parser("intake", help="manage the plugin-owned durable intake queue")
+    intake_sub = p_intake.add_subparsers(dest="intake_command", required=True)
+
+    p_baseline = intake_sub.add_parser("baseline", help="mark the current store as already seen")
+    p_baseline.add_argument("--json", action="store_true", help="emit JSON")
+    p_baseline.set_defaults(func=cmd_intake_baseline)
+
+    p_claim = intake_sub.add_parser("claim", help="atomically claim unseen recordings for one worker batch")
+    p_claim.add_argument("--json", action="store_true", help="emit JSON")
+    p_claim.set_defaults(func=cmd_intake_claim)
+
+    p_attach = intake_sub.add_parser("attach", help="attach a created Codex task to a claimed batch")
+    p_attach.add_argument("--batch", required=True, help="batch ID returned by intake claim")
+    p_attach.add_argument("--task", required=True, help="Codex task ID")
+    p_attach.add_argument("--json", action="store_true", help="emit JSON")
+    p_attach.set_defaults(func=cmd_intake_attach)
+
+    p_release = intake_sub.add_parser("release", help="return an un-dispatched claim to the queue")
+    p_release.add_argument("--batch", required=True, help="batch ID returned by intake claim")
+    p_release.add_argument("--json", action="store_true", help="emit JSON")
+    p_release.set_defaults(func=cmd_intake_release)
+
+    p_resolve = intake_sub.add_parser("resolve", help="record a worker's finished routing decision")
+    p_resolve.add_argument("recording", help="recording UUID, filename, or filename stem")
+    p_resolve.add_argument("--state", choices=("completed", "pending"), required=True)
+    p_resolve.add_argument("--destination", help="canonical destination or concise outcome pointer")
+    p_resolve.add_argument("--note", help="brief unresolved-routing note")
+    p_resolve.add_argument("--json", action="store_true", help="emit JSON")
+    p_resolve.set_defaults(func=cmd_intake_resolve)
+
+    p_status = intake_sub.add_parser("status", help="show plugin-owned intake state")
+    p_status.add_argument("--json", action="store_true", help="emit JSON")
+    p_status.set_defaults(func=cmd_intake_status)
 
     args = parser.parse_args(argv)
     try:

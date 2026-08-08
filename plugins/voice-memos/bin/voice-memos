@@ -21,6 +21,7 @@ Commands:
   list        List recordings from the macOS Voice Memos store
   transcript  Print Apple's embedded on-device transcript for a recording
   path        Print the absolute audio path for a recording
+  intake      Claim and track unattended intake batches by recording UUID
 
 Run "voice-memos <command> --help" for options.
 Requires Full Disk Access to read the Voice Memos database.
@@ -29,7 +30,7 @@ USAGE
 
 command="${1:-}"
 case "$command" in
-  list | transcript | path)
+  list | transcript | path | intake)
     exec python3 "$plugin_root/scripts/voice_memos.py" "$@"
     ;;
   help | -h | --help | "")

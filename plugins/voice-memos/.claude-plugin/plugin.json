@@ -1,7 +1,7 @@
 {
   "name": "voice-memos",
-  "version": "0.1.0",
-  "description": "Read the macOS Voice Memos store — recordings, metadata, and Apple's embedded transcripts.",
+  "version": "0.2.0",
+  "description": "Read the macOS Voice Memos store and durably deduplicate intake batches by recording UUID.",
   "author": {
     "name": "PedroAVJ",
     "url": "https://github.com/PedroAVJ"

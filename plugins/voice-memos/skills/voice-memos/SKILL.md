@@ -1,6 +1,6 @@
 ---
 name: voice-memos
-description: Read the macOS Voice Memos store — enumerate recordings with correct timestamps and durations, resolve a recording to its audio path, and extract Apple's on-device transcript when one exists. Use whenever a task involves Apple Voice Memos on a Mac, including finding recent recordings, locating audio to transcribe, or checking what was recorded when.
+description: Read the macOS Voice Memos store, atomically claim new recordings for an intake worker by UUID, resolve recordings to audio paths, and extract Apple's on-device transcript when one exists. Use whenever a task involves Apple Voice Memos on a Mac, including an unattended intake watcher.
 ---
 
 # Voice Memos
@@ -17,6 +17,7 @@ voice-memos list --json
 voice-memos list --since 2026-08-01
 voice-memos path 38BEC65A
 voice-memos transcript 38BEC65A
+voice-memos intake claim --json
 ```
 
 ## Why Not Just List The .m4a Files
@@ -34,6 +35,48 @@ looks equivalent and is not. Three things go wrong, and all three fail quietly:
 
 Going through the store also returns duration and title directly, so there is
 no need to shell out to `afinfo` per file.
+
+## Unattended Intake Cursor
+
+For a heartbeat watcher, do not use chat memory, filenames, or a destination
+repository as the dedup cursor. Claim the live recordings through the plugin:
+
+```bash
+voice-memos intake baseline --json
+voice-memos intake claim --json
+```
+
+Run `baseline` once before enabling a new watcher. It records the current store
+as already seen so historical recordings are not retroactively dispatched.
+Then `claim` atomically records stable `ZUNIQUEID` values in the plugin-owned SQLite
+state and returns one `batch_id` plus the newly claimed memo metadata. If the
+count is zero, stay silent. If the count is nonzero, create exactly one worker
+task for that batch, then attach its task ID:
+
+```bash
+voice-memos intake attach --batch BATCH_ID --task CODEX_TASK_ID --json
+```
+
+If task creation fails, release the un-dispatched claim so a later heartbeat can
+retry:
+
+```bash
+voice-memos intake release --batch BATCH_ID --json
+```
+
+The worker — not the watcher — reads the memo and decides its destination. Once
+it has completed a memo or preserved an unresolved one, it records only the
+outcome pointer:
+
+```bash
+voice-memos intake resolve UUID --state completed --destination /canonical/path --json
+voice-memos intake resolve UUID --state pending --note "Need destination" --json
+```
+
+`voice-memos intake status --json` is for audit and recovery. The database
+defaults to `~/Library/Application Support/voice-memos/intake.sqlite3`; set
+`VOICE_MEMOS_STATE_DB` for tests or a managed runtime. It never stores the
+transcript or routing policy.
 
 ## Apple's Embedded Transcripts
 
@@ -66,6 +109,7 @@ store, not a permissions problem.
 
 ## Scope
 
-Read-only. This plugin never writes to the Voice Memos store, never deletes
-recordings, and never moves audio. Transcription of audio belongs to a
-transcription tool; filing and routing belong to whatever workflow called this.
+This plugin never writes to the Voice Memos store, never deletes recordings,
+and never moves audio. Its intake commands write only a small plugin-owned
+SQLite cursor. Transcription belongs to a transcription tool; filing and
+routing belong to the worker workflow that called this plugin.
