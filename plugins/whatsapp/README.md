@@ -14,8 +14,8 @@ This project is unofficial and is not affiliated with WhatsApp or Meta.
 - SQLite-backed reads over contacts, chats, messages, reactions, read receipts,
   context, and media.
 - A composable JSON CLI designed for agents: `whatsapp --json ...`.
-- Opt-in ElevenLabs transcription for specific audio messages with a local
-  SQLite transcript cache.
+- Scheduled ElevenLabs transcription of incoming audio with a local SQLite
+  transcript cache, so voice notes are already readable before an agent asks.
 - Local draft records before sending.
 - Live-send guardrails: `--dry-run` or explicit `--confirm` is required.
 - Codex and Claude Code plugin metadata.
@@ -116,12 +116,24 @@ each message when the bridge has observed it. Reactions are exposed as
 list for `read` receipts. This is message receipt data, not online presence or
 last-active tracking.
 
-Audio transcription is explicit and cached. `messages list` and `messages
-context` never transcribe audio automatically. Use `media transcribe` only for
-the particular audio message needed for a task; repeated calls return the cached
-transcript unless `--refresh` is passed. The command uses the sibling
-ElevenLabs plugin helper when available and requires `ELEVENLABS_API_KEY` only
-on cache misses.
+Audio transcription is scheduled and cached. Reads never transcribe as a side
+effect: `messages list` and `messages context` leave audio alone. Instead,
+`media autotranscribe install` registers a LaunchAgent that periodically runs
+`media transcribe-pending`, which transcribes any audio with no cached
+transcript and skips everything already done. Agents read the cache with
+`media transcripts show`; `media transcribe` remains available for a single
+message that has not been drained yet, and repeated calls return the cached
+transcript unless `--refresh` is passed.
+
+This is scheduled rather than on demand because WhatsApp expires media from
+its CDN after roughly two to three weeks. Audio that is not transcribed inside
+that window cannot be recovered, so leaving the decision to whoever happens to
+read the chat loses data permanently.
+
+Transcription uses the sibling ElevenLabs plugin helper and requires
+`ELEVENLABS_API_KEY` only on cache misses. The LaunchAgent runs through a login
+shell so it picks that key up from the user's profile rather than storing a
+copy in the plist.
 
 ## Use With Claude Code
 

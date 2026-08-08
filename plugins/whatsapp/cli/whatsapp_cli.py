@@ -7,6 +7,8 @@ import argparse
 import hashlib
 import json
 import os
+import plistlib
+import shlex
 import shutil
 import sqlite3
 import subprocess
@@ -1118,6 +1120,235 @@ def command_media_transcribe(args: argparse.Namespace) -> dict[str, Any]:
     }
 
 
+def resolve_messages_db_path() -> Path:
+    db_info = backend_json("db-path", timeout=30)
+    if not isinstance(db_info, dict) or not db_info.get("messages_db_path"):
+        raise CliError("Could not resolve the WhatsApp messages database path.", code="missing_messages_db")
+    path = Path(db_info["messages_db_path"]).expanduser()
+    if not path.exists():
+        raise CliError(
+            "The WhatsApp messages database does not exist yet.",
+            code="messages_db_missing",
+            details={"messages_db_path": str(path)},
+        )
+    return path
+
+
+def pending_audio_messages(*, chat_jid: str | None, since: str | None, limit: int) -> tuple[list[dict[str, Any]], int]:
+    """Audio messages in the bridge store that have no cached transcript yet.
+
+    Pending means no transcript row exists for the message at all, whatever
+    options produced it. Backfill never re-spends on an already transcribed
+    message; `media transcribe --refresh` remains the way to redo one.
+    """
+    transcribed: set[tuple[str, str]] = set()
+    with open_transcripts_db() as conn:
+        for row in conn.execute("SELECT message_id, chat_jid FROM media_transcripts"):
+            transcribed.add((row["message_id"], row["chat_jid"]))
+
+    audio_types = sorted(AUDIO_MEDIA_TYPES)
+    clauses = ["LOWER(COALESCE(media_type, '')) IN ({})".format(",".join("?" for _ in audio_types))]
+    values: list[Any] = list(audio_types)
+    if chat_jid:
+        clauses.append("chat_jid = ?")
+        values.append(chat_jid)
+    if since:
+        clauses.append("timestamp >= ?")
+        values.append(since)
+
+    conn = sqlite3.connect(f"file:{resolve_messages_db_path()}?mode=ro", uri=True)
+    conn.row_factory = sqlite3.Row
+    try:
+        rows = conn.execute(
+            f"SELECT id, chat_jid, sender, timestamp, media_type FROM messages "
+            f"WHERE {' AND '.join(clauses)} ORDER BY timestamp DESC",
+            values,
+        ).fetchall()
+    finally:
+        conn.close()
+
+    pending = [
+        {
+            "message_id": row["id"],
+            "chat_jid": row["chat_jid"],
+            "sender": row["sender"],
+            "timestamp": row["timestamp"],
+            "media_type": row["media_type"],
+        }
+        for row in rows
+        if (row["id"], row["chat_jid"]) not in transcribed
+    ]
+    return pending[:limit], len(pending)
+
+
+def command_media_transcribe_pending(args: argparse.Namespace) -> dict[str, Any]:
+    if args.limit < 1:
+        raise CliError("media transcribe-pending --limit must be greater than zero.", code="invalid_limit")
+
+    pending, pending_total = pending_audio_messages(chat_jid=args.chat_jid, since=args.since, limit=args.limit)
+    result: dict[str, Any] = {
+        "pending_total": pending_total,
+        "selected": len(pending),
+        "transcripts_db_path": str(transcripts_db_path()),
+    }
+    if args.dry_run:
+        result["dry_run"] = True
+        result["messages"] = pending
+        return result
+
+    transcribed: list[dict[str, Any]] = []
+    failed: list[dict[str, Any]] = []
+    for item in pending:
+        call_args = argparse.Namespace(
+            message_id=item["message_id"],
+            chat_jid=item["chat_jid"],
+            language=args.language,
+            model=args.model,
+            response_format=args.response_format,
+            diarize=args.diarize,
+            num_speakers=args.num_speakers,
+            keyterm=args.keyterm,
+            no_verbatim=args.no_verbatim,
+            refresh=False,
+            allow_non_audio=False,
+            timeout_seconds=args.timeout_seconds,
+        )
+        try:
+            outcome = command_media_transcribe(call_args)
+        except CliError as exc:
+            failed.append({**item, "error": str(exc), "code": exc.code})
+            if args.stop_on_error:
+                break
+            continue
+        transcript = outcome.get("transcript") or {}
+        transcribed.append({**item, "transcript_path": transcript.get("transcript_path")})
+
+    result["transcribed"] = transcribed
+    result["failed"] = failed
+    result["remaining"] = max(pending_total - len(transcribed), 0)
+    return result
+
+
+AUTOTRANSCRIBE_LABEL = "com.loadout.whatsapp.transcribe-pending"
+
+
+def autotranscribe_plist_path() -> Path:
+    return Path("~/Library/LaunchAgents").expanduser() / f"{AUTOTRANSCRIBE_LABEL}.plist"
+
+
+def autotranscribe_log_path() -> Path:
+    return transcripts_db_path().with_name("transcribe-pending.log")
+
+
+def whatsapp_entrypoint() -> str:
+    """The `whatsapp` command a LaunchAgent should invoke.
+
+    Prefer whatever is on PATH, so the agent follows the installed plugin
+    rather than pinning a checkout that may move or disappear.
+    """
+    found = shutil.which("whatsapp")
+    if found:
+        return found
+    local = SOURCE_ROOT / "bin" / "whatsapp"
+    if local.exists():
+        return str(local)
+    raise CliError(
+        "Could not locate a `whatsapp` entrypoint to schedule.",
+        code="missing_entrypoint",
+        details={"searched": ["PATH", str(local)]},
+    )
+
+
+def launchctl(*argv: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(["launchctl", *argv], text=True, capture_output=True, timeout=30)
+
+
+def autotranscribe_loaded() -> bool:
+    return launchctl("list", AUTOTRANSCRIBE_LABEL).returncode == 0
+
+
+def command_media_autotranscribe_install(args: argparse.Namespace) -> dict[str, Any]:
+    if args.interval < 60:
+        raise CliError("media autotranscribe install --interval must be at least 60 seconds.", code="invalid_interval")
+    if args.limit < 1:
+        raise CliError("media autotranscribe install --limit must be greater than zero.", code="invalid_limit")
+
+    entrypoint = whatsapp_entrypoint()
+    log_path = autotranscribe_log_path()
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    inner = [entrypoint, "media", "transcribe-pending", "--limit", str(args.limit)]
+    if args.language:
+        inner.extend(["--language", args.language])
+    if args.model:
+        inner.extend(["--model", args.model])
+
+    # A login shell so the agent inherits ELEVENLABS_API_KEY from the user's
+    # profile instead of copying the secret into a world-readable plist.
+    command = " ".join(shlex.quote(part) for part in inner)
+    plist = {
+        "Label": AUTOTRANSCRIBE_LABEL,
+        "ProgramArguments": ["/bin/zsh", "-lc", command],
+        "StartInterval": args.interval,
+        "RunAtLoad": True,
+        "StandardOutPath": str(log_path),
+        "StandardErrorPath": str(log_path),
+        "ProcessType": "Background",
+    }
+
+    plist_path = autotranscribe_plist_path()
+    plist_path.parent.mkdir(parents=True, exist_ok=True)
+    with plist_path.open("wb") as handle:
+        plistlib.dump(plist, handle)
+
+    domain = f"gui/{os.getuid()}"
+    launchctl("bootout", f"{domain}/{AUTOTRANSCRIBE_LABEL}")
+    boot = launchctl("bootstrap", domain, str(plist_path))
+    if boot.returncode != 0 and not autotranscribe_loaded():
+        raise CliError(
+            "Wrote the LaunchAgent but launchctl could not load it.",
+            code="launchctl_bootstrap_failed",
+            details={"returncode": boot.returncode, "stderr": boot.stderr.strip()[-2000:], "plist_path": str(plist_path)},
+        )
+
+    return {
+        "installed": True,
+        "label": AUTOTRANSCRIBE_LABEL,
+        "plist_path": str(plist_path),
+        "interval_seconds": args.interval,
+        "limit": args.limit,
+        "command": command,
+        "log_path": str(log_path),
+        "loaded": autotranscribe_loaded(),
+    }
+
+
+def command_media_autotranscribe_status(args: argparse.Namespace) -> dict[str, Any]:
+    plist_path = autotranscribe_plist_path()
+    listing = launchctl("list", AUTOTRANSCRIBE_LABEL)
+    log_path = autotranscribe_log_path()
+    with open_transcripts_db() as conn:
+        cached = conn.execute("SELECT COUNT(*) FROM media_transcripts").fetchone()[0]
+    return {
+        "label": AUTOTRANSCRIBE_LABEL,
+        "installed": plist_path.exists(),
+        "loaded": listing.returncode == 0,
+        "plist_path": str(plist_path),
+        "log_path": str(log_path) if log_path.exists() else None,
+        "cached_transcripts": cached,
+        "launchctl": listing.stdout.strip()[-2000:] if listing.returncode == 0 else None,
+    }
+
+
+def command_media_autotranscribe_uninstall(args: argparse.Namespace) -> dict[str, Any]:
+    plist_path = autotranscribe_plist_path()
+    launchctl("bootout", f"gui/{os.getuid()}/{AUTOTRANSCRIBE_LABEL}")
+    existed = plist_path.exists()
+    if existed:
+        plist_path.unlink()
+    return {"uninstalled": True, "plist_removed": existed, "plist_path": str(plist_path), "loaded": autotranscribe_loaded()}
+
+
 def command_media_transcripts_list(args: argparse.Namespace) -> dict[str, Any]:
     if args.limit < 1:
         raise CliError("media transcripts list --limit must be greater than zero.", code="invalid_limit")
@@ -1717,6 +1948,71 @@ def build_parser() -> argparse.ArgumentParser:
     )
     media_transcribe.add_argument("--timeout-seconds", type=int, default=1800)
     media_transcribe.set_defaults(func=command_media_transcribe)
+    media_transcribe_pending = media_sub.add_parser(
+        "transcribe-pending",
+        help="Transcribe audio messages that have no cached transcript yet.",
+    )
+    media_transcribe_pending.add_argument("--chat-jid", help="Restrict the backfill to one chat.")
+    media_transcribe_pending.add_argument("--since", help="Only messages at or after this timestamp, such as '2026-08-01'.")
+    media_transcribe_pending.add_argument(
+        "--limit",
+        type=int,
+        default=25,
+        help="Maximum messages to transcribe in one run (default 25). Each one is a paid ElevenLabs call.",
+    )
+    media_transcribe_pending.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Report the pending backlog without calling ElevenLabs.",
+    )
+    media_transcribe_pending.add_argument(
+        "--stop-on-error",
+        action="store_true",
+        help="Stop at the first failure instead of continuing through the batch.",
+    )
+    media_transcribe_pending.add_argument("--language", help="Optional language hint such as 'es'.")
+    media_transcribe_pending.add_argument("--model", default="scribe_v2")
+    media_transcribe_pending.add_argument(
+        "--response-format",
+        default="text",
+        choices=["text", "json", "diarized_text", "segments_json"],
+    )
+    media_transcribe_pending.add_argument("--diarize", action="store_true")
+    media_transcribe_pending.add_argument("--num-speakers", type=int)
+    media_transcribe_pending.add_argument("--keyterm", action="append", default=[])
+    media_transcribe_pending.add_argument("--no-verbatim", action="store_true")
+    media_transcribe_pending.add_argument("--timeout-seconds", type=int, default=1800)
+    media_transcribe_pending.set_defaults(func=command_media_transcribe_pending)
+    media_autotranscribe = media_sub.add_parser(
+        "autotranscribe",
+        help="Keep new audio transcribed automatically with a background LaunchAgent.",
+    )
+    media_autotranscribe_sub = media_autotranscribe.add_subparsers(dest="media_autotranscribe_command", required=True)
+    media_autotranscribe_install = media_autotranscribe_sub.add_parser(
+        "install",
+        help="Install and load the LaunchAgent that drains pending transcriptions.",
+    )
+    media_autotranscribe_install.add_argument(
+        "--interval",
+        type=int,
+        default=1800,
+        help="Seconds between runs (default 1800).",
+    )
+    media_autotranscribe_install.add_argument(
+        "--limit",
+        type=int,
+        default=50,
+        help="Maximum messages transcribed per run (default 50).",
+    )
+    media_autotranscribe_install.add_argument("--language", help="Optional language hint such as 'es'.")
+    media_autotranscribe_install.add_argument("--model", help="Override the ElevenLabs model.")
+    media_autotranscribe_install.set_defaults(func=command_media_autotranscribe_install)
+    media_autotranscribe_sub.add_parser("status", help="Show whether the LaunchAgent is installed and loaded.").set_defaults(
+        func=command_media_autotranscribe_status
+    )
+    media_autotranscribe_sub.add_parser("uninstall", help="Unload and remove the LaunchAgent.").set_defaults(
+        func=command_media_autotranscribe_uninstall
+    )
     media_transcripts = media_sub.add_parser("transcripts", help="Inspect cached media transcripts.")
     media_transcripts_sub = media_transcripts.add_subparsers(dest="media_transcripts_command", required=True)
     media_transcripts_list = media_transcripts_sub.add_parser("list", help="List cached media transcripts.")

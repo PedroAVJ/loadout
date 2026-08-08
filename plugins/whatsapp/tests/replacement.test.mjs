@@ -176,7 +176,7 @@ test("skill documents the temporary MCP collision workaround", () => {
   assert.match(skill, /whatsapp --json chats list/i);
 });
 
-test("audio transcription is explicit and cached through the CLI", () => {
+test("audio transcription is scheduled and cached through the CLI", () => {
   const cli = fs.readFileSync(path.join(pluginRoot, "cli", "whatsapp_cli.py"), "utf8");
   const skill = fs.readFileSync(path.join(pluginRoot, "skills", "whatsapp", "SKILL.md"), "utf8");
   const readme = fs.readFileSync(path.join(pluginRoot, "README.md"), "utf8");
@@ -187,8 +187,31 @@ test("audio transcription is explicit and cached through the CLI", () => {
   assert.match(cli, /WHATSAPP_TRANSCRIPTS_DB_PATH/);
   assert.match(cli, /--refresh/);
   assert.match(skill, /media transcribe MESSAGE_ID/);
-  assert.match(skill, /Do not transcribe every audio message/i);
-  assert.match(readme, /Audio transcription is explicit and cached/i);
+  assert.match(skill, /Do not loop `media transcribe` over a listing/i);
+  assert.match(readme, /Audio transcription is scheduled and cached/i);
+});
+
+test("pending transcription drains on a schedule without an agent deciding", () => {
+  const cli = fs.readFileSync(path.join(pluginRoot, "cli", "whatsapp_cli.py"), "utf8");
+  const skill = fs.readFileSync(path.join(pluginRoot, "skills", "whatsapp", "SKILL.md"), "utf8");
+  const readme = fs.readFileSync(path.join(pluginRoot, "README.md"), "utf8");
+
+  // Backfill selects only audio with no cached transcript, and is bounded per run.
+  assert.match(cli, /media_sub\.add_parser\(\s*"transcribe-pending"/);
+  assert.match(cli, /def pending_audio_messages/);
+  assert.match(cli, /def command_media_transcribe_pending/);
+  assert.match(cli, /"--dry-run"/);
+
+  // The scheduler is installable from the plugin, not hand-rolled per machine.
+  assert.match(cli, /AUTOTRANSCRIBE_LABEL = "com\.loadout\.whatsapp\.transcribe-pending"/);
+  assert.match(cli, /media_sub\.add_parser\(\s*"autotranscribe"/);
+  assert.match(cli, /"bootstrap"/);
+  // A login shell keeps ELEVENLABS_API_KEY out of the plist.
+  assert.match(cli, /"\/bin\/zsh", "-lc", command/);
+
+  // The CDN expiry window is the reason this is scheduled; keep it documented.
+  assert.match(skill, /expires media from\s+its CDN/i);
+  assert.match(readme, /expires media from\s+its CDN/i);
 });
 
 test("list_messages returns structured reply metadata", () => {

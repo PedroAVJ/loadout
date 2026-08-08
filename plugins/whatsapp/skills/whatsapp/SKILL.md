@@ -37,12 +37,18 @@ phone-number code fallback.
 - Use contact/chat resolution before broad message reads when the user names a person.
 - Use message context when replies or nearby discussion matter.
 - Download media only when the media itself is needed for the task.
-- For a specific WhatsApp audio message, prefer the cached ElevenLabs path:
-  `whatsapp --json media transcribe MESSAGE_ID "CHAT_JID" --language es`.
-  This downloads and transcribes only that requested message, stores the
-  transcript in the local transcript cache, and returns cached text on later
-  calls. Use `--refresh` only when the human asks to retranscribe or the
-  cached transcript is clearly bad.
+- Audio transcription is background infrastructure, not an agent decision.
+  `media autotranscribe install` runs a LaunchAgent that drains pending audio
+  on an interval, so a transcript normally already exists. **Read it**:
+  `whatsapp --json media transcripts show MESSAGE_ID --chat-jid "CHAT_JID"`.
+- Call `media transcribe MESSAGE_ID "CHAT_JID"` only when a specific message
+  has no cached transcript yet and the task needs it now. Use `--refresh`
+  only when the human asks to retranscribe or the cached transcript is
+  clearly bad.
+- WhatsApp expires media from its CDN after roughly two to three weeks.
+  Audio older than that cannot be downloaded or transcribed at all — a
+  missing transcript on an old message is permanent, not a task to retry.
+  This is why the backfill is scheduled rather than on demand.
 
 Useful fallback commands:
 
@@ -52,8 +58,10 @@ whatsapp --json chats list --query "project name" --limit 20 --no-last-message
 whatsapp --json messages list --chat-jid "CHAT_JID" --limit 30
 whatsapp --json messages context MESSAGE_ID --before 5 --after 5
 whatsapp --json media download MESSAGE_ID "CHAT_JID"
-whatsapp --json media transcribe MESSAGE_ID "CHAT_JID" --language es
 whatsapp --json media transcripts show MESSAGE_ID --chat-jid "CHAT_JID"
+whatsapp --json media transcribe MESSAGE_ID "CHAT_JID"
+whatsapp --json media transcribe-pending --dry-run
+whatsapp --json media autotranscribe status
 ```
 
 Message JSON may include `reactions`, `receipts`, and `seen_by` when the bridge
@@ -87,8 +95,9 @@ whatsapp --json drafts send DRAFT_ID --confirm
 ## Rules
 
 - Reading and local drafts are safe by default.
-- Do not transcribe every audio message returned by a listing; transcription is
-  opt-in for the particular audio message needed to answer the task.
+- Do not loop `media transcribe` over a listing to catch up a backlog. The
+  scheduled drain owns that; an agent transcribes at most the one message it
+  needs right now and otherwise reads the cache.
 - Never live-send with `--confirm` unless the user approved the exact recipient and exact message in the current conversation.
 - Never send to multiple recipients without spacing the sends; see the pacing rule above. Batch approval is not batch dispatch.
 - Use `--json` whenever reading command output for analysis.
