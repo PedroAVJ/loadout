@@ -14,6 +14,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"reflect"
@@ -1198,7 +1199,58 @@ func handleMessage(client *whatsmeow.Client, messageStore *MessageStore, msg *ev
 		} else if content != "" {
 			fmt.Printf("[%s] %s %s: %s\n", timestamp, direction, sender, content)
 		}
+
+		if mediaType != "" {
+			runMediaArrivalHook(mediaType, messageID, chatJID, logger)
+		}
 	}
+}
+
+// runMediaArrivalHook fires WHATSAPP_MEDIA_ARRIVAL_HOOK when media lands, so
+// arrival-triggered work (transcription, thumbnailing) happens on the event
+// instead of a poller discovering it later. WhatsApp expires media from its
+// CDN within weeks, so "later" is not always available.
+//
+// The hook is a command; the media type, message ID, and chat JID are appended
+// as arguments. WHATSAPP_MEDIA_ARRIVAL_HOOK_TYPES narrows which media types
+// fire it (comma-separated, default "audio"). Unset means no hook runs.
+func runMediaArrivalHook(mediaType, messageID, chatJID string, logger waLog.Logger) {
+	hook := strings.TrimSpace(os.Getenv("WHATSAPP_MEDIA_ARRIVAL_HOOK"))
+	if hook == "" || messageID == "" || chatJID == "" {
+		return
+	}
+
+	wanted := strings.TrimSpace(os.Getenv("WHATSAPP_MEDIA_ARRIVAL_HOOK_TYPES"))
+	if wanted == "" {
+		wanted = "audio"
+	}
+	matched := false
+	for _, candidate := range strings.Split(wanted, ",") {
+		if strings.EqualFold(strings.TrimSpace(candidate), mediaType) {
+			matched = true
+			break
+		}
+	}
+	if !matched {
+		return
+	}
+
+	// Detached: a slow or wedged hook must never stall the event loop, and a
+	// failure here is recoverable because the scheduled drain still sweeps up
+	// anything the hook missed.
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+		defer cancel()
+
+		parts := strings.Fields(hook)
+		args := append(append([]string{}, parts[1:]...), mediaType, messageID, chatJID)
+		cmd := exec.CommandContext(ctx, parts[0], args...)
+		cmd.Stdout = nil
+		cmd.Stderr = nil
+		if err := cmd.Run(); err != nil {
+			logger.Warnf("Media arrival hook failed for %s (%s): %v", messageID, mediaType, err)
+		}
+	}()
 }
 
 func handleReceipt(messageStore *MessageStore, receipt *events.Receipt, logger waLog.Logger) {

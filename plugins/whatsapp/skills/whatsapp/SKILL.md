@@ -37,9 +37,10 @@ phone-number code fallback.
 - Use contact/chat resolution before broad message reads when the user names a person.
 - Use message context when replies or nearby discussion matter.
 - Download media only when the media itself is needed for the task.
-- Audio transcription is background infrastructure, not an agent decision.
-  `media autotranscribe install` runs a LaunchAgent that drains pending audio
-  on an interval, so a transcript normally already exists. **Read it**:
+- Audio transcription is background infrastructure, not an agent decision. The
+  bridge transcribes a voice note when it arrives, and a scheduled sweep
+  catches anything that landed while the bridge was down, so a transcript
+  normally already exists. **Read it**:
   `whatsapp --json media transcripts show MESSAGE_ID --chat-jid "CHAT_JID"`.
 - Call `media transcribe MESSAGE_ID "CHAT_JID"` only when a specific message
   has no cached transcript yet and the task needs it now. Use `--refresh`

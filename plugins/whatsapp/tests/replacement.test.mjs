@@ -188,7 +188,7 @@ test("audio transcription is scheduled and cached through the CLI", () => {
   assert.match(cli, /--refresh/);
   assert.match(skill, /media transcribe MESSAGE_ID/);
   assert.match(skill, /Do not loop `media transcribe` over a listing/i);
-  assert.match(readme, /Audio transcription is scheduled and cached/i);
+  assert.match(readme, /Audio transcription is arrival-triggered and cached/i);
 });
 
 test("pending transcription drains on a schedule without an agent deciding", () => {
@@ -212,6 +212,32 @@ test("pending transcription drains on a schedule without an agent deciding", () 
   // The CDN expiry window is the reason this is scheduled; keep it documented.
   assert.match(skill, /expires media from\s+its CDN/i);
   assert.match(readme, /expires media from\s+its CDN/i);
+});
+
+test("audio transcription is triggered by message arrival, not only by a sweep", () => {
+  const bridge = fs.readFileSync(
+    path.join(pluginRoot, "vendor", "lharries-whatsapp-mcp", "whatsapp-bridge", "main.go"),
+    "utf8",
+  );
+  const env = fs.readFileSync(path.join(pluginRoot, "scripts", "common_env.sh"), "utf8");
+  const cli = fs.readFileSync(path.join(pluginRoot, "cli", "whatsapp_cli.py"), "utf8");
+  const readme = fs.readFileSync(path.join(pluginRoot, "README.md"), "utf8");
+
+  // The bridge fires a hook on the message event itself.
+  assert.match(bridge, /func runMediaArrivalHook/);
+  assert.match(bridge, /runMediaArrivalHook\(mediaType, messageID, chatJID, logger\)/);
+  assert.match(bridge, /WHATSAPP_MEDIA_ARRIVAL_HOOK_TYPES/);
+  // Detached, so a slow hook cannot stall the event loop.
+  assert.match(bridge, /go func\(\) \{[\s\S]*exec\.CommandContext/);
+
+  // The plugin wires the hook to the transcription entry point by default.
+  assert.match(env, /WHATSAPP_MEDIA_ARRIVAL_HOOK="\$\{WHATSAPP_MEDIA_ARRIVAL_HOOK:-.*media arrival-hook\}"/);
+  assert.match(cli, /media_sub\.add_parser\(\s*"arrival-hook"/);
+  assert.match(cli, /def command_media_arrival_hook/);
+  // Re-firing on an already transcribed message must not re-spend.
+  assert.match(cli, /"already_cached"/);
+
+  assert.match(readme, /arrival-triggered and cached/i);
 });
 
 test("permanently unavailable audio leaves the queue instead of retrying forever", () => {

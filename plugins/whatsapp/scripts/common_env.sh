@@ -45,6 +45,13 @@ export WHATSAPP_MCP_HTTP_PORT="$HTTP_PORT"
 export WHATSAPP_MCP_QR_TEXT_PATH="$QR_TEXT_PATH"
 export WHATSAPP_MCP_QR_PNG_PATH="$QR_PNG_PATH"
 
+# Transcribe voice notes the moment they arrive. WhatsApp expires media from
+# its CDN within weeks, so discovering audio on a later sweep is not always
+# good enough. The scheduled drain stays as the safety net for anything that
+# lands while the bridge is down.
+export WHATSAPP_MEDIA_ARRIVAL_HOOK="${WHATSAPP_MEDIA_ARRIVAL_HOOK:-$PLUGIN_ROOT/bin/whatsapp media arrival-hook}"
+export WHATSAPP_MEDIA_ARRIVAL_HOOK_TYPES="${WHATSAPP_MEDIA_ARRIVAL_HOOK_TYPES:-audio}"
+
 resolve_pair_phone() {
   if [[ -n "${WHATSAPP_MCP_PAIR_PHONE:-}" ]]; then
     return 0

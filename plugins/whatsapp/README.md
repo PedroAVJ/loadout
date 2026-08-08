@@ -116,19 +116,29 @@ each message when the bridge has observed it. Reactions are exposed as
 list for `read` receipts. This is message receipt data, not online presence or
 last-active tracking.
 
-Audio transcription is scheduled and cached. Reads never transcribe as a side
-effect: `messages list` and `messages context` leave audio alone. Instead,
-`media autotranscribe install` registers a LaunchAgent that periodically runs
-`media transcribe-pending`, which transcribes any audio with no cached
-transcript and skips everything already done. Agents read the cache with
-`media transcripts show`; `media transcribe` remains available for a single
-message that has not been drained yet, and repeated calls return the cached
-transcript unless `--refresh` is passed.
+Audio transcription is arrival-triggered and cached. Reads never transcribe as
+a side effect: `messages list` and `messages context` leave audio alone.
 
-This is scheduled rather than on demand because WhatsApp expires media from
-its CDN after roughly two to three weeks. Audio that is not transcribed inside
-that window cannot be recovered, so leaving the decision to whoever happens to
-read the chat loses data permanently.
+The bridge fires `WHATSAPP_MEDIA_ARRIVAL_HOOK` when media lands, which the
+plugin points at `media arrival-hook`. A voice note is therefore transcribed
+seconds after it arrives, on the message event itself, with no polling in the
+primary path. `WHATSAPP_MEDIA_ARRIVAL_HOOK_TYPES` controls which media types
+fire it (default `audio`); unset the hook to disable it entirely.
+
+`media autotranscribe install` registers a LaunchAgent as the safety net
+underneath that, periodically running `media transcribe-pending` to sweep up
+anything the hook missed — audio that landed while the bridge was down, a
+history sync, or a hook that failed. It is a reconciliation floor, not the
+mechanism.
+
+Agents read the cache with `media transcripts show`; `media transcribe`
+remains available for a single message that has not been handled yet, and
+repeated calls return the cached transcript unless `--refresh` is passed.
+
+Both paths exist because WhatsApp expires media from its CDN after roughly two
+to three weeks. Audio not transcribed inside that window cannot be recovered,
+so the event handles the normal case and the sweep guarantees the window is
+never missed through downtime alone.
 
 Because expired media never comes back, failures are durable rather than
 retried forever: a message that fails three times drops out of the pending

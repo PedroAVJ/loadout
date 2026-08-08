@@ -1422,6 +1422,53 @@ def command_media_autotranscribe_uninstall(args: argparse.Namespace) -> dict[str
     return {"uninstalled": True, "plist_removed": existed, "plist_path": str(plist_path), "loaded": autotranscribe_loaded()}
 
 
+def command_media_arrival_hook(args: argparse.Namespace) -> dict[str, Any]:
+    """Transcribe one just-arrived audio message.
+
+    Invoked by the bridge on the message-arrival event, so a voice note is
+    readable within seconds rather than whenever a sweep next runs. Failures
+    are recorded and swallowed: the bridge must not be destabilized by a
+    transcription problem, and the scheduled drain retries anyway.
+    """
+    if args.media_type.lower() not in AUDIO_MEDIA_TYPES:
+        return {"skipped": True, "reason": "not_audio", "media_type": args.media_type}
+
+    with open_transcripts_db() as conn:
+        existing = conn.execute(
+            "SELECT 1 FROM media_transcripts WHERE message_id = ? AND chat_jid = ? LIMIT 1",
+            (args.message_id, args.chat_jid),
+        ).fetchone()
+    if existing:
+        return {"skipped": True, "reason": "already_cached", "message_id": args.message_id}
+
+    call_args = argparse.Namespace(
+        message_id=args.message_id,
+        chat_jid=args.chat_jid,
+        language=args.language,
+        model=args.model,
+        response_format="text",
+        diarize=False,
+        num_speakers=None,
+        keyterm=[],
+        no_verbatim=False,
+        refresh=False,
+        allow_non_audio=False,
+        timeout_seconds=args.timeout_seconds,
+    )
+    try:
+        outcome = command_media_transcribe(call_args)
+    except CliError as exc:
+        attempts = record_transcribe_failure(args.message_id, args.chat_jid, exc.code, str(exc))
+        return {"transcribed": False, "message_id": args.message_id, "code": exc.code, "attempts": attempts}
+
+    transcript = outcome.get("transcript") or {}
+    return {
+        "transcribed": True,
+        "message_id": args.message_id,
+        "transcript_path": transcript.get("transcript_path"),
+    }
+
+
 def command_media_transcripts_list(args: argparse.Namespace) -> dict[str, Any]:
     if args.limit < 1:
         raise CliError("media transcripts list --limit must be greater than zero.", code="invalid_limit")
@@ -2064,6 +2111,17 @@ def build_parser() -> argparse.ArgumentParser:
     media_transcribe_pending.add_argument("--no-verbatim", action="store_true")
     media_transcribe_pending.add_argument("--timeout-seconds", type=int, default=1800)
     media_transcribe_pending.set_defaults(func=command_media_transcribe_pending)
+    media_arrival_hook = media_sub.add_parser(
+        "arrival-hook",
+        help="Transcribe a just-arrived audio message. Invoked by the bridge, not by hand.",
+    )
+    media_arrival_hook.add_argument("media_type")
+    media_arrival_hook.add_argument("message_id")
+    media_arrival_hook.add_argument("chat_jid")
+    media_arrival_hook.add_argument("--language", help="Optional language hint such as 'es'.")
+    media_arrival_hook.add_argument("--model", default="scribe_v2")
+    media_arrival_hook.add_argument("--timeout-seconds", type=int, default=1800)
+    media_arrival_hook.set_defaults(func=command_media_arrival_hook)
     media_autotranscribe = media_sub.add_parser(
         "autotranscribe",
         help="Keep new audio transcribed automatically with a background LaunchAgent.",
